@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="Catálogo y pedidos online">
+  <title>Tienda</title>
+  <link rel="stylesheet" href="assets/store.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Inicio">
+      <span class="brand-mark">D</span>
+      <span><strong id="storeName">Tienda</strong><small>Datalisting</small></span>
+    </a>
+    <button class="cart-button" id="cartButton" type="button" aria-controls="cartDrawer">
+      Pedido <span id="cartCount">0</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">CATÁLOGO ONLINE</p>
+        <h1 id="headline">Productos y servicios</h1>
+        <p class="hero-copy">Elegí lo que necesitás, armá el pedido y envialo directamente.</p>
+      </div>
+      <div class="hero-card"><span>Pedido simple</span><strong>Sin registro obligatorio</strong><small>El precio final se valida en el servidor al enviar.</small></div>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros">
+      <label class="search"><span>Buscar</span><input id="searchInput" type="search" placeholder="Nombre o descripción"></label>
+      <div class="filters" id="filters">
+        <button class="filter active" data-filter="all" type="button">Todos</button>
+        <button class="filter" data-filter="product" type="button">Productos</button>
+        <button class="filter" data-filter="service" type="button">Servicios</button>
+      </div>
+    </section>
+
+    <section class="status" id="status">Cargando catálogo…</section>
+    <section class="catalog" id="catalog" aria-live="polite"></section>
+  </main>
+
+  <aside class="drawer" id="cartDrawer" aria-hidden="true">
+    <div class="drawer-head"><div><small>Tu selección</small><h2>Pedido</h2></div><button class="icon-button" id="closeCart" type="button" aria-label="Cerrar">×</button></div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-empty" id="cartEmpty">Todavía no agregaste productos.</div>
+    <div class="cart-summary"><span>Total estimado</span><strong id="cartTotal">$ 0</strong></div>
+    <button class="checkout-button" id="checkoutButton" type="button">Continuar pedido</button>
+  </aside>
+  <button class="backdrop" id="backdrop" type="button" aria-label="Cerrar"></button>
+
+  <dialog class="checkout" id="checkoutDialog">
+    <form class="checkout-card" id="checkoutForm">
+      <div class="drawer-head"><div><small>Último paso</small><h2>Datos del pedido</h2></div><button class="icon-button" id="closeCheckout" type="button" aria-label="Cerrar">×</button></div>
+      <div class="checkout-grid">
+        <label>Nombre<input name="customer_name" required maxlength="150" autocomplete="name"></label>
+        <label>Email<input name="customer_email" type="email" maxlength="255" autocomplete="email"></label>
+        <label>Teléfono<input name="customer_phone" maxlength="60" autocomplete="tel"></label>
+        <label class="full">Notas<textarea name="notes" maxlength="2000" rows="4" placeholder="Entrega, variantes, horario, etc."></textarea></label>
+      </div>
+      <p class="form-help">Indicá al menos email o teléfono para que puedan contactarte.</p>
+      <div class="checkout-total"><span>Total estimado</span><strong id="checkoutTotal">$ 0</strong></div>
+      <button class="checkout-button" id="sendOrderButton" type="button">Enviar pedido</button>
+      <p class="form-message" id="formMessage" role="status"></p>
+    </form>
+  </dialog>
+
+  <footer><span id="footerStore">Tienda</span><span>·</span><span>Gestionado con Datalisting</span></footer>
+  <script src="config.js"></script>
+  <script src="assets/store.js"></script>
+</body>
+</html>
