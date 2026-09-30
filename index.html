@@ -4,42 +4,93 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="Catálogo y pedidos online">
-  <title>Tienda</title>
+  <meta name="description" content="Datalisting · Catálogo y pedidos online">
+  <title>Datalisting</title>
   <link rel="stylesheet" href="assets/store.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#" aria-label="Inicio">
+    <a class="brand" href="#inicio" aria-label="Inicio">
       <span class="brand-mark">D</span>
-      <span><strong id="storeName">Tienda</strong><small>Datalisting</small></span>
+      <span><strong id="storeName">Datalisting</strong><small>soluciones digitales</small></span>
     </a>
+    <nav class="nav-links">
+      <a href="#inicio">Inicio</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#novedades">Novedades</a>
+    </nav>
     <button class="cart-button" id="cartButton" type="button" aria-controls="cartDrawer">
       Pedido <span id="cartCount">0</span>
     </button>
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero reveal" id="inicio">
+      <div class="hero-copy-block">
+        <p class="eyebrow">DATALISTING · TECNOLOGÍA APLICADA</p>
+        <h1 id="headline">Productos y servicios que se mueven con vos.</h1>
+        <p class="hero-copy">Una vidriera digital conectada directamente con nuestro sistema de gestión. Explorá, compará y armá tu pedido.</p>
+        <div class="hero-actions">
+          <a class="primary-link" href="#catalogo">Ver catálogo</a>
+          <a class="secondary-link" href="#presentacion">Conocer Datalisting</a>
+        </div>
+        <div class="live-strip"><span class="pulse-dot"></span><span>Catálogo conectado en tiempo real con Datalisting</span></div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <canvas id="heroCanvas"></canvas>
+        <div class="orbit orbit-a"></div>
+        <div class="orbit orbit-b"></div>
+        <div class="data-card data-card-a"><small>CATÁLOGO</small><strong>Dinámico</strong><span>Productos y servicios</span></div>
+        <div class="data-card data-card-b"><small>GESTIÓN</small><strong>Conectada</strong><span>Precios y pedidos</span></div>
+        <div class="data-card data-card-c"><small>DATALISTING</small><strong>Online</strong><span>24/7</span></div>
+      </div>
+    </section>
+
+    <section class="presentation reveal" id="presentacion">
       <div>
-        <p class="eyebrow">CATÁLOGO ONLINE</p>
-        <h1 id="headline">Productos y servicios</h1>
-        <p class="hero-copy">Elegí lo que necesitás, armá el pedido y envialo directamente.</p>
+        <p class="eyebrow">UN SOLO SISTEMA</p>
+        <h2>De la gestión interna a la experiencia del cliente.</h2>
       </div>
-      <div class="hero-card"><span>Pedido simple</span><strong>Sin registro obligatorio</strong><small>El precio final se valida en el servidor al enviar.</small></div>
-    </section>
-
-    <section class="toolbar" aria-label="Filtros">
-      <label class="search"><span>Buscar</span><input id="searchInput" type="search" placeholder="Nombre o descripción"></label>
-      <div class="filters" id="filters">
-        <button class="filter active" data-filter="all" type="button">Todos</button>
-        <button class="filter" data-filter="product" type="button">Productos</button>
-        <button class="filter" data-filter="service" type="button">Servicios</button>
+      <div class="presentation-grid">
+        <article><span>01</span><h3>Explorá</h3><p>Consultá productos y servicios publicados directamente desde Datalisting.</p></article>
+        <article><span>02</span><h3>Elegí</h3><p>Armá tu selección con cantidades y un total estimado siempre visible.</p></article>
+        <article><span>03</span><h3>Gestioná</h3><p>Los pedidos llegan al backend para ser administrados desde un único lugar.</p></article>
       </div>
     </section>
 
-    <section class="status" id="status">Cargando catálogo…</section>
-    <section class="catalog" id="catalog" aria-live="polite"></section>
+    <section id="catalogo" class="catalog-section reveal">
+      <div class="section-heading">
+        <div><p class="eyebrow">CATÁLOGO ONLINE</p><h2>Elegí lo que necesitás</h2></div>
+        <p>El contenido se actualiza desde Datalisting sin tener que modificar esta página.</p>
+      </div>
+
+      <section class="toolbar" aria-label="Filtros">
+        <label class="search"><span>Buscar</span><input id="searchInput" type="search" placeholder="Nombre o descripción"></label>
+        <div class="filters" id="filters">
+          <button class="filter active" data-filter="all" type="button">Todos</button>
+          <button class="filter" data-filter="product" type="button">Productos</button>
+          <button class="filter" data-filter="service" type="button">Servicios</button>
+        </div>
+      </section>
+
+      <section class="status" id="status">Cargando catálogo…</section>
+      <section class="catalog" id="catalog" aria-live="polite"></section>
+    </section>
+
+    <section class="news reveal" id="novedades">
+      <div class="news-copy">
+        <p class="eyebrow">NOVEDADES</p>
+        <h2>Lo nuevo, lo útil y lo que viene.</h2>
+        <p>Este espacio queda preparado para nuevos productos, servicios, promociones y contenido destacado.</p>
+      </div>
+      <div class="news-ticker" aria-hidden="true">
+        <div class="ticker-track">
+          <span>DATALISTING</span><i>•</i><span>NUEVOS SERVICIOS</span><i>•</i><span>GESTIÓN DIGITAL</span><i>•</i><span>CATÁLOGO ONLINE</span><i>•</i>
+          <span>DATALISTING</span><i>•</i><span>NUEVOS SERVICIOS</span><i>•</i><span>GESTIÓN DIGITAL</span><i>•</i><span>CATÁLOGO ONLINE</span><i>•</i>
+        </div>
+      </div>
+    </section>
   </main>
 
   <aside class="drawer" id="cartDrawer" aria-hidden="true">
@@ -67,8 +118,9 @@
     </form>
   </dialog>
 
-  <footer><span id="footerStore">Tienda</span><span>·</span><span>Gestionado con Datalisting</span></footer>
+  <footer><span id="footerStore">Datalisting</span><span>·</span><span>Gestión y experiencia digital conectadas</span></footer>
   <script src="config.js"></script>
   <script src="assets/store.js"></script>
+  <script src="assets/hero.js"></script>
 </body>
 </html>
