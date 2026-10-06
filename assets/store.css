@@ -418,3 +418,105 @@ main{width:min(1240px,calc(100% - 32px))}
     padding-top:38px;
   }
 }
+
+
+/* --- Animated focused entry 2026-10-06 --- */
+.store-entry{
+  min-height:calc(100vh - 69px);
+  display:grid;
+  align-items:center;
+  padding:44px 0;
+}
+.store-entry-layout{
+  display:grid;
+  grid-template-columns:minmax(0,.92fr) minmax(420px,1.08fr);
+  gap:34px;
+  align-items:stretch;
+  width:100%;
+}
+.store-entry-card{
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:520px;
+}
+.store-entry-card h1{
+  font-size:clamp(48px,7vw,82px);
+}
+.store-entry-lead{
+  max-width:620px;
+}
+.store-entry-copy{
+  margin-left:0;
+  margin-right:0;
+  max-width:560px;
+}
+.store-entry-button{
+  align-self:flex-start;
+}
+.store-entry-visual{
+  position:relative;
+  min-height:520px;
+  border:1px solid rgba(98,214,255,.16);
+  border-radius:32px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(98,214,255,.08),transparent 42%),
+    linear-gradient(160deg,rgba(16,34,54,.95),rgba(7,17,27,.8));
+  box-shadow:var(--shadow);
+}
+.store-entry-visual #heroCanvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+.store-entry-visual .orbit{
+  pointer-events:none;
+}
+.store-entry-visual .data-card{
+  max-width:190px;
+}
+@media(max-width:980px){
+  .store-entry-layout{
+    grid-template-columns:1fr;
+  }
+  .store-entry-card{
+    min-height:0;
+    padding:40px clamp(22px,6vw,72px);
+    text-align:center;
+  }
+  .store-entry-copy{
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .store-entry-button{
+    align-self:center;
+  }
+  .store-entry-visual{
+    min-height:390px;
+  }
+}
+@media(max-width:650px){
+  .store-entry{
+    min-height:0;
+    padding:24px 0 30px;
+  }
+  .store-entry-layout{
+    gap:18px;
+  }
+  .store-entry-card{
+    padding:34px 20px;
+  }
+  .store-entry-visual{
+    min-height:320px;
+    border-radius:24px;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .store-entry-visual .orbit,
+  .store-entry-visual .data-card{
+    animation:none !important;
+  }
+}

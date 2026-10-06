@@ -21,12 +21,23 @@
 
   <main>
     <section class="store-entry" id="inicio">
-      <div class="store-entry-card">
-        <p class="eyebrow">DATALISTING</p>
-        <h1>Tienda online</h1>
-        <p class="store-entry-lead">Productos y servicios en un solo lugar.</p>
-        <p class="store-entry-copy">Consultá el catálogo, buscá lo que necesitás y armá tu pedido directamente desde la tienda.</p>
-        <a class="primary-link store-entry-button" href="#catalogo">Ingresar al catálogo</a>
+      <div class="store-entry-layout">
+        <div class="store-entry-card">
+          <p class="eyebrow">DATALISTING</p>
+          <h1>Tienda online</h1>
+          <p class="store-entry-lead">Productos y servicios en un solo lugar.</p>
+          <p class="store-entry-copy">Consultá el catálogo, buscá lo que necesitás y armá tu pedido directamente desde la tienda.</p>
+          <a class="primary-link store-entry-button" href="#catalogo">Ingresar al catálogo</a>
+        </div>
+
+        <div class="store-entry-visual" aria-hidden="true">
+          <canvas id="heroCanvas"></canvas>
+          <div class="orbit orbit-a"></div>
+          <div class="orbit orbit-b"></div>
+          <div class="data-card data-card-a"><small>CATÁLOGO</small><strong>+1.000</strong><span>productos conectados</span></div>
+          <div class="data-card data-card-b"><small>PRECIOS</small><strong>Dinámicos</strong><span>actualizados desde Datalisting</span></div>
+          <div class="data-card data-card-c"><small>PEDIDOS</small><strong>Online</strong><span>carrito y gestión integrada</span></div>
+        </div>
       </div>
     </section>
 
@@ -85,5 +96,6 @@
   <footer><span id="footerStore">Datalisting</span><span>·</span><span>Tienda online</span></footer>
   <script src="config.js"></script>
   <script src="assets/store.js"></script>
+  <script src="assets/hero.js"></script>
 </body>
 </html>
