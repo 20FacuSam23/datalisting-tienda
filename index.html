@@ -10,14 +10,12 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#inicio" aria-label="Inicio">
+    <a class="brand" href="#catalogo" aria-label="Ir al catálogo">
       <span class="brand-mark">D</span>
       <span><strong id="storeName">Datalisting</strong><small>soluciones digitales</small></span>
     </a>
     <nav class="nav-links">
-      <a href="#inicio">Inicio</a>
       <a href="#catalogo">Catálogo</a>
-      <a href="#novedades">Novedades</a>
     </nav>
     <button class="cart-button" id="cartButton" type="button" aria-controls="cartDrawer">
       Pedido <span id="cartCount">0</span>
@@ -25,44 +23,19 @@
   </header>
 
   <main>
-    <section class="hero reveal" id="inicio">
+    <section class="hero hero-compact" id="inicio">
       <div class="hero-copy-block">
-        <p class="eyebrow">DATALISTING · TECNOLOGÍA APLICADA</p>
-        <h1 id="headline">Productos y servicios que se mueven con vos.</h1>
-        <p class="hero-copy">Una vidriera digital conectada directamente con nuestro sistema de gestión. Explorá, compará y armá tu pedido.</p>
-        <div class="hero-actions">
-          <a class="primary-link" href="#catalogo">Ver catálogo</a>
-          <a class="secondary-link" href="#presentacion">Conocer Datalisting</a>
-        </div>
-        <div class="live-strip"><span class="pulse-dot"></span><span>Catálogo conectado en tiempo real con Datalisting</span></div>
+        <p class="eyebrow">TIENDA ONLINE</p>
+        <h1 id="headline">Productos disponibles</h1>
+        <p class="hero-copy">Buscá, elegí y armá tu pedido.</p>
       </div>
-
-      <div class="hero-visual" aria-hidden="true">
-        <canvas id="heroCanvas"></canvas>
-        <div class="orbit orbit-a"></div>
-        <div class="orbit orbit-b"></div>
-        <div class="data-card data-card-a"><small>CATÁLOGO</small><strong>Dinámico</strong><span>Productos y servicios</span></div>
-        <div class="data-card data-card-b"><small>GESTIÓN</small><strong>Conectada</strong><span>Precios y pedidos</span></div>
-        <div class="data-card data-card-c"><small>DATALISTING</small><strong>Online</strong><span>24/7</span></div>
-      </div>
+      <a class="primary-link hero-catalog-link" href="#catalogo">Ver productos</a>
     </section>
 
-    <section class="presentation reveal" id="presentacion">
-      <div>
-        <p class="eyebrow">UN SOLO SISTEMA</p>
-        <h2>De la gestión interna a la experiencia del cliente.</h2>
-      </div>
-      <div class="presentation-grid">
-        <article><span>01</span><h3>Explorá</h3><p>Consultá productos y servicios publicados directamente desde Datalisting.</p></article>
-        <article><span>02</span><h3>Elegí</h3><p>Armá tu selección con cantidades y un total estimado siempre visible.</p></article>
-        <article><span>03</span><h3>Gestioná</h3><p>Los pedidos llegan al backend para ser administrados desde un único lugar.</p></article>
-      </div>
-    </section>
-
-    <section id="catalogo" class="catalog-section reveal">
-      <div class="section-heading">
-        <div><p class="eyebrow">CATÁLOGO ONLINE</p><h2>Elegí lo que necesitás</h2></div>
-        <p>El contenido se actualiza desde Datalisting sin tener que modificar esta página.</p>
+    <section id="catalogo" class="catalog-section">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow">CATÁLOGO</p><h2>Productos</h2></div>
+        <p><strong id="heroCount">—</strong> productos publicados y actualizados desde Datalisting.</p>
       </div>
 
       <section class="toolbar" aria-label="Búsqueda y orden">
@@ -83,6 +56,7 @@
           </select>
         </label>
       </section>
+
       <section class="category-strip" id="categoryFilters" aria-label="Categorías">
         <button class="filter active" data-category="all" type="button">Todos</button>
       </section>
@@ -90,20 +64,6 @@
       <section class="status" id="status">Cargando catálogo…</section>
       <section class="catalog" id="catalog" aria-live="polite"></section>
       <div class="load-more-wrap"><button class="secondary-link load-more" id="loadMoreButton" type="button" hidden>Cargar más productos</button></div>
-    </section>
-
-    <section class="news reveal" id="novedades">
-      <div class="news-copy">
-        <p class="eyebrow">NOVEDADES</p>
-        <h2>Lo nuevo, lo útil y lo que viene.</h2>
-        <p>Este espacio queda preparado para nuevos productos, servicios, promociones y contenido destacado.</p>
-      </div>
-      <div class="news-ticker" aria-hidden="true">
-        <div class="ticker-track">
-          <span>DATALISTING</span><i>•</i><span>NUEVOS SERVICIOS</span><i>•</i><span>GESTIÓN DIGITAL</span><i>•</i><span>CATÁLOGO ONLINE</span><i>•</i>
-          <span>DATALISTING</span><i>•</i><span>NUEVOS SERVICIOS</span><i>•</i><span>GESTIÓN DIGITAL</span><i>•</i><span>CATÁLOGO ONLINE</span><i>•</i>
-        </div>
-      </div>
     </section>
   </main>
 
@@ -115,6 +75,13 @@
     <button class="checkout-button" id="checkoutButton" type="button">Continuar pedido</button>
   </aside>
   <button class="backdrop" id="backdrop" type="button" aria-label="Cerrar"></button>
+
+  <dialog class="product-detail-dialog" id="productDialog">
+    <div class="product-detail-shell">
+      <button class="icon-button product-detail-close" id="closeProductDialog" type="button" aria-label="Cerrar">×</button>
+      <div id="productDialogContent"></div>
+    </div>
+  </dialog>
 
   <dialog class="checkout" id="checkoutDialog">
     <form class="checkout-card" id="checkoutForm">
@@ -132,9 +99,8 @@
     </form>
   </dialog>
 
-  <footer><span id="footerStore">Datalisting</span><span>·</span><span>Gestión y experiencia digital conectadas</span></footer>
+  <footer><span id="footerStore">Datalisting</span><span>·</span><span>Catálogo y pedidos online</span></footer>
   <script src="config.js"></script>
   <script src="assets/store.js"></script>
-  <script src="assets/hero.js"></script>
 </body>
 </html>
