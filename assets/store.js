@@ -282,6 +282,7 @@
   }
 
   function renderCategories() {
+    if (!categoryFilters) return;
     categoryFilters.replaceChildren();
     const all = document.createElement('button');
     all.className = `filter ${state.category === 'all' ? 'active' : ''}`;
@@ -491,15 +492,17 @@
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => loadCatalog({ reset: true }), 280);
   });
-  $('sortSelect').addEventListener('change', e => {
+  const sortSelect = $('sortSelect');
+  if (sortSelect) sortSelect.addEventListener('change', e => {
     state.sort = e.target.value;
     loadCatalog({ reset: true });
   });
-  $('availabilitySelect').addEventListener('change', e => {
+  const availabilitySelect = $('availabilitySelect');
+  if (availabilitySelect) availabilitySelect.addEventListener('change', e => {
     state.availability = e.target.value;
     loadCatalog({ reset: true });
   });
-  categoryFilters.addEventListener('click', e => {
+  if (categoryFilters) categoryFilters.addEventListener('click', e => {
     const button = e.target.closest('[data-category]');
     if (!button) return;
     state.category = button.dataset.category;
