@@ -152,12 +152,6 @@
       category.className = 'product-type';
       category.textContent = item.category?.name || (item.type === 'service' ? 'Servicio' : 'Producto');
       meta.append(category);
-      if (item.source) {
-        const source = document.createElement('span');
-        source.className = 'source-tag';
-        source.textContent = String(item.source).toUpperCase();
-        meta.append(source);
-      }
 
       const title = document.createElement('h3');
       title.textContent = item.name;
@@ -227,12 +221,6 @@
     category.className = 'product-type';
     category.textContent = item.category?.name || 'Producto';
     meta.append(category);
-    if (item.source) {
-      const source = document.createElement('span');
-      source.className = 'source-tag';
-      source.textContent = String(item.source).toUpperCase();
-      meta.append(source);
-    }
 
     const title = document.createElement('h2');
     title.textContent = item.name;
@@ -469,7 +457,20 @@
       formMessage.classList.add('success');
       const finalTotal = result.total != null ? ` · total confirmado ${money(Number(result.total))}` : '';
       const customerPricing = result.customer_pricing_applied ? ' · se aplicó tu condición comercial' : '';
-      formMessage.textContent = `Pedido enviado. Código ${String(result.order_id || '').slice(0, 8)}${finalTotal}${customerPricing}.`;
+      const emailText = result.email_sent ? ' · enviado por email' : '';
+      formMessage.replaceChildren();
+      const text = document.createElement('span');
+      text.textContent = `Pedido recibido. Código ${String(result.order_id || '').slice(0, 8)}${finalTotal}${customerPricing}${emailText}.`;
+      formMessage.append(text);
+      if (result.whatsapp_url) {
+        const link = document.createElement('a');
+        link.className = 'whatsapp-order-link';
+        link.href = result.whatsapp_url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = 'Enviar también por WhatsApp';
+        formMessage.append(document.createElement('br'), link);
+      }
     } catch (error) {
       formMessage.classList.add('error');
       formMessage.textContent = error.message || 'No se pudo enviar el pedido.';
