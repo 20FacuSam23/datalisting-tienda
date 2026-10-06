@@ -237,9 +237,11 @@
     const title = document.createElement('h2');
     title.textContent = item.name;
 
-    const desc = document.createElement('p');
-    desc.className = 'product-detail-description';
-    desc.textContent = item.description || 'Sin descripción.';
+    const desc = item.description?.trim() ? document.createElement('p') : null;
+    if (desc) {
+      desc.className = 'product-detail-description';
+      desc.textContent = item.description.trim();
+    }
 
     const price = document.createElement('div');
     price.className = 'product-detail-price';
@@ -268,7 +270,9 @@
       openCart();
     });
 
-    info.append(meta, title, desc, price, availability, add);
+    info.append(meta, title);
+    if (desc) info.append(desc);
+    info.append(price, availability, add);
     layout.append(visual, info);
     productDialogContent.append(layout);
     productDialog.showModal();
