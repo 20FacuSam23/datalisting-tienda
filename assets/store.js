@@ -34,6 +34,8 @@
   const sendOrderButton = $('sendOrderButton');
   const categoryFilters = $('categoryFilters');
   const loadMoreButton = $('loadMoreButton');
+  const productDialog = $('productDialog');
+  const productDialogContent = $('productDialogContent');
   const storageKey = `datalisting-cart:${ORG}`;
 
   function money(value) {
@@ -107,7 +109,16 @@
 
     rows.forEach((item) => {
       const card = document.createElement('article');
-      card.className = 'product';
+      card.className = 'product product-clickable';
+      card.tabIndex = 0;
+      card.setAttribute('aria-label', `Ver ${item.name}`);
+      card.addEventListener('click', () => openProduct(item));
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openProduct(item);
+        }
+      });
 
       const media = document.createElement('div');
       media.className = 'product-media';
@@ -116,7 +127,10 @@
         img.src = item.image_url;
         img.alt = item.name;
         img.loading = 'lazy';
-        img.addEventListener('error', () => media.replaceChildren(makePlaceholder(item.name)));
+        img.addEventListener('error', () => {
+          const placeholder = makePlaceholder(item.name);
+          img.replaceWith(placeholder);
+        });
         media.append(img);
       } else {
         media.append(makePlaceholder(item.name));
@@ -172,7 +186,10 @@
       add.type = 'button';
       add.textContent = item.available === false ? 'No disponible' : 'Agregar';
       add.disabled = item.available === false;
-      add.addEventListener('click', () => changeQty(item.id, 1));
+      add.addEventListener('click', e => {
+        e.stopPropagation();
+        changeQty(item.id, 1);
+      });
 
       foot.append(price, add);
       body.append(meta, title, desc, foot);
@@ -181,6 +198,80 @@
     });
 
     loadMoreButton.hidden = !state.hasMore || state.loading;
+  }
+
+  function openProduct(item) {
+    productDialogContent.replaceChildren();
+
+    const layout = document.createElement('div');
+    layout.className = 'product-detail-grid';
+
+    const visual = document.createElement('div');
+    visual.className = 'product-detail-media';
+    if (item.image_url) {
+      const img = document.createElement('img');
+      img.src = item.image_url;
+      img.alt = item.name;
+      img.addEventListener('error', () => img.replaceWith(makePlaceholder(item.name)));
+      visual.append(img);
+    } else {
+      visual.append(makePlaceholder(item.name));
+    }
+
+    const info = document.createElement('div');
+    info.className = 'product-detail-info';
+
+    const meta = document.createElement('div');
+    meta.className = 'product-meta';
+    const category = document.createElement('span');
+    category.className = 'product-type';
+    category.textContent = item.category?.name || 'Producto';
+    meta.append(category);
+    if (item.source) {
+      const source = document.createElement('span');
+      source.className = 'source-tag';
+      source.textContent = String(item.source).toUpperCase();
+      meta.append(source);
+    }
+
+    const title = document.createElement('h2');
+    title.textContent = item.name;
+
+    const desc = document.createElement('p');
+    desc.className = 'product-detail-description';
+    desc.textContent = item.description || 'Sin descripción.';
+
+    const price = document.createElement('div');
+    price.className = 'product-detail-price';
+    if (item.list_price != null && Number(item.list_price) > Number(item.price)) {
+      const old = document.createElement('small');
+      old.className = 'old-price';
+      old.textContent = money(Number(item.list_price));
+      price.append(old);
+    }
+    const strong = document.createElement('strong');
+    strong.textContent = money(Number(item.price));
+    price.append(strong);
+
+    const availability = document.createElement('p');
+    availability.className = item.available === false ? 'detail-stock unavailable-text' : 'detail-stock';
+    availability.textContent = item.available === false ? 'No disponible' : 'Disponible';
+
+    const add = document.createElement('button');
+    add.className = 'checkout-button detail-add';
+    add.type = 'button';
+    add.disabled = item.available === false;
+    add.textContent = item.available === false ? 'No disponible' : 'Agregar al pedido';
+    add.addEventListener('click', () => {
+      changeQty(item.id, 1);
+      productDialog.close();
+      openCart();
+    });
+
+    info.append(meta, title, desc, price, availability, add);
+    layout.append(visual, info);
+    productDialogContent.append(layout);
+    productDialog.showModal();
   }
 
   function makePlaceholder(name) {
@@ -312,6 +403,8 @@
       }
       state.total = data.pagination?.total ?? state.offerings.length;
       state.hasMore = data.pagination?.has_more ?? false;
+      const heroCount = $('heroCount');
+      if (heroCount) heroCount.textContent = new Intl.NumberFormat('es-AR').format(state.total);
 
       document.title = state.store.name || 'Tienda';
       $('storeName').textContent = state.store.name || 'Tienda';
@@ -387,6 +480,10 @@
   backdrop.addEventListener('click', closeCart);
   checkoutButton.addEventListener('click', () => { closeCart(); checkoutDialog.showModal(); });
   $('closeCheckout').addEventListener('click', () => checkoutDialog.close());
+  $('closeProductDialog').addEventListener('click', () => productDialog.close());
+  productDialog.addEventListener('click', e => {
+    if (e.target === productDialog) productDialog.close();
+  });
   $('checkoutForm').addEventListener('submit', e => { e.preventDefault(); sendOrder(); });
   sendOrderButton.addEventListener('click', sendOrder);
   $('searchInput').addEventListener('input', e => {
