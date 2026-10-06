@@ -12,6 +12,7 @@
     search: '',
     category: 'all',
     sort: 'name_asc',
+    availability: 'all',
     page: 1,
     perPage: 24,
     hasMore: false,
@@ -288,7 +289,7 @@
       page: String(state.page),
       per_page: String(state.perPage),
       sort: state.sort,
-      available: '1'
+      available: state.availability
     });
     if (state.search.trim()) params.set('search', state.search.trim());
     if (state.category !== 'all') params.set('category', state.category);
@@ -395,6 +396,10 @@
   });
   $('sortSelect').addEventListener('change', e => {
     state.sort = e.target.value;
+    loadCatalog({ reset: true });
+  });
+  $('availabilitySelect').addEventListener('change', e => {
+    state.availability = e.target.value;
     loadCatalog({ reset: true });
   });
   categoryFilters.addEventListener('click', e => {
