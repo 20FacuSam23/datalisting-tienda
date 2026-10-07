@@ -458,9 +458,10 @@
       const finalTotal = result.total != null ? ` · total confirmado ${money(Number(result.total))}` : '';
       const customerPricing = result.customer_pricing_applied ? ' · se aplicó tu condición comercial' : '';
       const emailText = result.email_sent ? ' · enviado por email' : '';
+      const whatsappText = result.whatsapp_sent ? ' · enviado por WhatsApp' : '';
       formMessage.replaceChildren();
       const text = document.createElement('span');
-      text.textContent = `Pedido recibido. Código ${String(result.order_id || '').slice(0, 8)}${finalTotal}${customerPricing}${emailText}.`;
+      text.textContent = `Pedido recibido. Código ${String(result.order_id || '').slice(0, 8)}${finalTotal}${customerPricing}${emailText}${whatsappText}.`;
       formMessage.append(text);
       if (result.whatsapp_url) {
         const link = document.createElement('a');
@@ -468,7 +469,7 @@
         link.href = result.whatsapp_url;
         link.target = '_blank';
         link.rel = 'noopener';
-        link.textContent = 'Enviar también por WhatsApp';
+        link.textContent = result.email_sent ? 'Enviar también por WhatsApp' : 'Enviar por WhatsApp';
         formMessage.append(document.createElement('br'), link);
       }
     } catch (error) {
