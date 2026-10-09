@@ -9,6 +9,7 @@
     offerings: [],
     categories: [],
     cart: new Map(),
+    knownProducts: new Map(),
     search: '',
     category: 'all',
     sort: 'name_asc',
@@ -52,19 +53,30 @@
 
   function saveCart() {
     localStorage.setItem(storageKey, JSON.stringify([...state.cart.entries()]));
+    // Keep only selected-product snapshots so the cart survives catalog filters and reloads.
+    const selected = [...state.cart.keys()]
+      .map(id => productById(id))
+      .filter(Boolean)
+      .map(({ id, name, price, unit }) => ({ id, name, price, unit }));
+    localStorage.setItem(`${storageKey}:products`, JSON.stringify(selected));
   }
 
   function loadCart() {
     try {
       const raw = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      state.cart = new Map(raw.map(([id, qty]) => [Number(id), Number(qty)]).filter(([, qty]) => qty > 0));
+      state.cart = new Map(raw.map(([id, qty]) => [Number(id), Number(qty)]).filter(([id, qty]) => Number.isFinite(id) && Number.isFinite(qty) && qty > 0));
+      const cached = JSON.parse(localStorage.getItem(`${storageKey}:products`) || '[]');
+      if (Array.isArray(cached)) cached.forEach(item => {
+        if (Number.isFinite(Number(item.id))) state.knownProducts.set(Number(item.id), item);
+      });
     } catch (_) {
       state.cart = new Map();
     }
   }
 
   function productById(id) {
-    return state.offerings.find((item) => Number(item.id) === Number(id));
+    return state.offerings.find(item => Number(item.id) === Number(id))
+      || state.knownProducts.get(Number(id));
   }
 
   function cartTotal() {
@@ -96,6 +108,62 @@
     return rows;
   }
 
+  function renderProductActions(actions, item) {
+    actions.replaceChildren();
+    const qty = state.cart.get(Number(item.id)) || 0;
+    actions.classList.toggle('has-quantity', qty > 0);
+
+    if (item.available === false) {
+      const unavailable = document.createElement('button');
+      unavailable.className = 'add-button';
+      unavailable.type = 'button';
+      unavailable.disabled = true;
+      unavailable.textContent = 'No disponible';
+      actions.append(unavailable);
+      return;
+    }
+
+    if (!qty) {
+      const add = document.createElement('button');
+      add.className = 'add-button';
+      add.type = 'button';
+      add.textContent = '+ Agregar';
+      add.setAttribute('aria-label', `Agregar ${item.name} al pedido`);
+      add.addEventListener('click', () => changeQty(item.id, 1));
+      actions.append(add);
+      return;
+    }
+
+    const minus = document.createElement('button');
+    minus.className = 'product-qty-button';
+    minus.type = 'button';
+    minus.textContent = '−';
+    minus.setAttribute('aria-label', `Quitar una unidad de ${item.name}`);
+    minus.addEventListener('click', () => changeQty(item.id, -1));
+
+    const count = document.createElement('span');
+    count.className = 'product-qty-count';
+    count.textContent = String(qty);
+    count.setAttribute('aria-label', `${qty} unidades de ${item.name} en el pedido`);
+
+    const plus = document.createElement('button');
+    plus.className = 'product-qty-button';
+    plus.type = 'button';
+    plus.textContent = '+';
+    plus.setAttribute('aria-label', `Agregar otra unidad de ${item.name}`);
+    plus.addEventListener('click', () => changeQty(item.id, 1));
+    actions.append(minus, count, plus);
+  }
+
+  function syncCatalogQuantities() {
+    catalog.querySelectorAll('[data-product-actions]').forEach(actions => {
+      const item = productById(actions.dataset.productActions);
+      if (!item) return;
+      renderProductActions(actions, item);
+      actions.closest('.product')?.classList.toggle('in-order', (state.cart.get(Number(item.id)) || 0) > 0);
+    });
+  }
+
   function renderCatalog() {
     catalog.replaceChildren();
     const rows = filteredLocalRows();
@@ -107,18 +175,17 @@
         ? `${shown} de ${total} ${total === 1 ? 'producto' : 'productos'}`
         : 'No encontramos coincidencias.';
 
-    rows.forEach((item) => {
+    rows.forEach(item => {
       const card = document.createElement('article');
-      card.className = 'product product-clickable';
-      card.tabIndex = 0;
-      card.setAttribute('aria-label', `Ver ${item.name}`);
-      card.addEventListener('click', () => openProduct(item));
-      card.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openProduct(item);
-        }
-      });
+      card.className = 'product';
+      card.classList.toggle('in-order', (state.cart.get(Number(item.id)) || 0) > 0);
+
+      // Preview and purchase controls are separate: tapping Add never opens the detail.
+      const preview = document.createElement('button');
+      preview.className = 'product-preview';
+      preview.type = 'button';
+      preview.setAttribute('aria-label', `Ver detalles de ${item.name}`);
+      preview.addEventListener('click', () => openProduct(item));
 
       const media = document.createElement('div');
       media.className = 'product-media';
@@ -127,10 +194,7 @@
         img.src = item.image_url;
         img.alt = item.name;
         img.loading = 'lazy';
-        img.addEventListener('error', () => {
-          const placeholder = makePlaceholder(item.name);
-          img.replaceWith(placeholder);
-        });
+        img.addEventListener('error', () => img.replaceWith(makePlaceholder(item.name)));
         media.append(img);
       } else {
         media.append(makePlaceholder(item.name));
@@ -142,10 +206,10 @@
         stock.textContent = 'No disponible';
         media.append(stock);
       }
+      preview.append(media);
 
       const body = document.createElement('div');
       body.className = 'product-body';
-
       const meta = document.createElement('div');
       meta.className = 'product-meta';
       const category = document.createElement('span');
@@ -154,10 +218,18 @@
       meta.append(category);
 
       const title = document.createElement('h3');
-      title.textContent = item.name;
-      const desc = document.createElement('p');
-      desc.className = 'product-desc';
-      desc.textContent = item.description || 'Sin descripción.';
+      const titleButton = document.createElement('button');
+      titleButton.className = 'product-title-button';
+      titleButton.type = 'button';
+      titleButton.textContent = item.name;
+      titleButton.addEventListener('click', () => openProduct(item));
+      title.append(titleButton);
+
+      const desc = item.description?.trim() ? document.createElement('p') : null;
+      if (desc) {
+        desc.className = 'product-desc';
+        desc.textContent = item.description.trim();
+      }
 
       const foot = document.createElement('div');
       foot.className = 'product-foot';
@@ -175,19 +247,16 @@
       small.textContent = item.unit ? `por ${item.unit}` : 'precio unitario';
       price.append(strong, small);
 
-      const add = document.createElement('button');
-      add.className = 'add-button';
-      add.type = 'button';
-      add.textContent = item.available === false ? 'No disponible' : 'Agregar';
-      add.disabled = item.available === false;
-      add.addEventListener('click', e => {
-        e.stopPropagation();
-        changeQty(item.id, 1);
-      });
+      const actions = document.createElement('div');
+      actions.className = 'product-actions';
+      actions.dataset.productActions = String(item.id);
+      renderProductActions(actions, item);
 
-      foot.append(price, add);
-      body.append(meta, title, desc, foot);
-      card.append(media, body);
+      foot.append(price, actions);
+      body.append(meta, title);
+      if (desc) body.append(desc);
+      body.append(foot);
+      card.append(preview, body);
       catalog.append(card);
     });
 
@@ -343,6 +412,7 @@
     $('checkoutTotal').textContent = money(cartTotal());
     cartEmpty.hidden = count > 0;
     checkoutButton.disabled = count === 0;
+    syncCatalogQuantities();
   }
 
   function openCart() {
@@ -386,6 +456,8 @@
       const data = await response.json();
       state.store = data.store || state.store;
       const incoming = Array.isArray(data.offerings) ? data.offerings : [];
+      incoming.forEach(item => state.knownProducts.set(Number(item.id), item));
+      if (state.cart.size) saveCart();
       state.serverPaging = Boolean(data.pagination);
       state.offerings = reset ? incoming : [...state.offerings, ...incoming.filter(x => !state.offerings.some(y => Number(y.id) === Number(x.id)))];
       state.categories = Array.isArray(data.categories) ? data.categories : state.categories;
