@@ -2,6 +2,47 @@
   'use strict';
 
   const config = window.DATALISTING_STORE || {};
+
+  // Datalisting storefront privacy guard.
+  // Web browsers cannot fully block OS screenshots, but this reduces accidental capture/copy/print.
+  const privacyShield = document.getElementById('privacyShield');
+
+  function setPrivacyHidden(hidden) {
+    document.body.classList.toggle('privacy-hidden', Boolean(hidden));
+    if (privacyShield) {
+      privacyShield.setAttribute('aria-hidden', hidden ? 'false' : 'true');
+    }
+  }
+
+  window.addEventListener('blur', () => setPrivacyHidden(true));
+  window.addEventListener('focus', () => setPrivacyHidden(false));
+  document.addEventListener('visibilitychange', () => {
+    setPrivacyHidden(document.hidden);
+  });
+
+  document.addEventListener('contextmenu', (event) => {
+    if (!event.target.closest('input, textarea')) event.preventDefault();
+  });
+
+  document.addEventListener('copy', (event) => {
+    if (!event.target.closest('input, textarea')) event.preventDefault();
+  });
+
+  document.addEventListener('cut', (event) => {
+    if (!event.target.closest('input, textarea')) event.preventDefault();
+  });
+
+  window.addEventListener('beforeprint', () => setPrivacyHidden(true));
+  window.addEventListener('afterprint', () => setPrivacyHidden(false));
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'p') {
+      event.preventDefault();
+      setPrivacyHidden(true);
+      setTimeout(() => setPrivacyHidden(false), 900);
+    }
+  });
+
   const API_BASE = String(config.API_BASE_URL || '').replace(/\/$/, '');
   const ORG = String(config.ORGANIZATION_SLUG || '');
   const state = {
