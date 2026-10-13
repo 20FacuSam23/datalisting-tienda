@@ -813,3 +813,36 @@ main{width:min(1240px,calc(100% - 32px))}
   .price strong{font-size:16px}
   .product-actions .add-button{font-size:12px}
 }
+
+
+/* Privacy guard */
+.privacy-shield{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:none;
+  place-items:center;
+  padding:24px;
+  background:#06101a;
+  color:#f4f8fc;
+  text-align:center;
+}
+.privacy-shield>div{
+  display:grid;
+  gap:6px;
+  max-width:420px;
+  padding:26px 30px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;
+  background:rgba(12,27,43,.92);
+}
+.privacy-shield strong{font-size:22px}
+.privacy-shield span{color:#b8c8d8}
+body.privacy-hidden .privacy-shield{display:grid}
+body.privacy-hidden > :not(.privacy-shield){visibility:hidden!important}
+body{-webkit-user-select:none;user-select:none}
+input,textarea,select{-webkit-user-select:text;user-select:text}
+@media print{
+  body > :not(.privacy-shield){display:none!important}
+  .privacy-shield{display:grid!important;position:fixed!important}
+}
