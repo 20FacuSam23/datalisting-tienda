@@ -44,8 +44,10 @@
   });
 
   const API_BASE = String(config.API_BASE_URL || '').replace(/\/$/, '');
-  const selectedOrg=new URLSearchParams(location.search).get('org');
+  const query=new URLSearchParams(location.search);const portal=query.get('portal')||config.PORTAL_SLUG;const selectedOrg=query.get('org');
   const ORG = String(selectedOrg&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(selectedOrg)?selectedOrg:(config.ORGANIZATION_SLUG || ''));
+  const ENDPOINT=portal&&!selectedOrg?`${API_BASE}/api/portales/${encodeURIComponent(/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(portal)?portal:'tienda-generica')}`:`${API_BASE}/api/storefront/${encodeURIComponent(ORG)}`;
+  if(portal&&!selectedOrg)fetch(`${API_BASE}/api/portales/${encodeURIComponent(portal)}/brand`).then(r=>r.ok?r.json():null).then(d=>{if(d?.hosted_url&&location.hostname.endsWith('github.io'))location.replace(d.hosted_url);}).catch(()=>{});
   const state = {
     store: { currency: 'ARS', name: 'Tienda' },
     offerings: [],
@@ -79,7 +81,7 @@
   const loadMoreButton = $('loadMoreButton');
   const productDialog = $('productDialog');
   const productDialogContent = $('productDialogContent');
-  const storageKey = `datalisting-cart:${ORG}`;
+  const storageKey = `datalisting-cart:${portal&&!selectedOrg?portal:ORG}`;
 
   function money(value) {
     try {
@@ -478,7 +480,7 @@
   }
 
   async function loadCatalog({ reset = true } = {}) {
-    if (!API_BASE || !ORG || ORG === 'TU_SLUG') {
+    if (!API_BASE || (!portal&&(!ORG || ORG === 'TU_SLUG'))) {
       status.textContent = 'Falta configurar ORGANIZATION_SLUG en config.js.';
       return;
     }
@@ -500,12 +502,12 @@
     if (state.category !== 'all') params.set('category', state.category);
 
     try {
-      const response = await fetch(`${API_BASE}/api/storefront/${encodeURIComponent(ORG)}/catalog?${params}`, {
-        headers: { Accept: 'application/json' }
+      const response = await fetch(`${ENDPOINT}/catalog?${params}`, {
+        headers: { Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+portal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+portal)}:{}) }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      state.store = data.store || state.store;
+      if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
       const incoming = Array.isArray(data.offerings) ? data.offerings : [];
       incoming.forEach(item => state.knownProducts.set(Number(item.id), item));
       if (state.cart.size) saveCart();
@@ -522,7 +524,7 @@
       const heroCount = $('heroCount');
       if (heroCount) heroCount.textContent = new Intl.NumberFormat('es-AR').format(state.total);
 
-      document.title = state.store.name || 'Tienda';
+      document.title = state.store.name || 'Tienda';if(/^https:\/\//.test(state.store.logo_url||'')){let logo=document.getElementById('storeLogo');if(!logo){logo=document.createElement('img');logo.id='storeLogo';logo.className='store-logo';logo.alt='Logotipo';document.querySelector('.brand').prepend(logo);}logo.src=state.store.logo_url;}
       $('storeName').textContent = state.store.name || 'Tienda';
       $('footerStore').textContent = state.store.name || 'Tienda';
       if($('headline'))$('headline').textContent = state.store.headline || 'Productos y servicios';
@@ -565,9 +567,9 @@
     sendOrderButton.disabled = true;
     sendOrderButton.textContent = 'Enviando…';
     try {
-      const response = await fetch(`${API_BASE}/api/storefront/${encodeURIComponent(ORG)}/orders`, {
+      const response = await fetch(`${ENDPOINT}/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+portal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+portal)}:{}) },
         body: JSON.stringify(payload)
       });
       const result = await response.json().catch(() => ({}));
@@ -585,7 +587,7 @@
       const emailText = result.email_sent ? ' · enviado por email' : '';
       formMessage.replaceChildren();
       const text = document.createElement('span');
-      text.textContent = `Pedido recibido. Código ${String(result.order_id || '').slice(0, 8)}${finalTotal}${customerPricing}${emailText}.`;
+      text.textContent = `${result.simulated?'Pedido de demostración registrado. No se realizó ningún cobro.':'Pedido recibido.'} Código ${String(result.order_id || '').slice(0, 8)}${finalTotal}${customerPricing}${emailText}.`;
       formMessage.append(text);
       if (result.whatsapp_url) {
         const link = document.createElement('a');
