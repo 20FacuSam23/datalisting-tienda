@@ -44,7 +44,8 @@
   });
 
   const API_BASE = String(config.API_BASE_URL || '').replace(/\/$/, '');
-  const ORG = String(config.ORGANIZATION_SLUG || '');
+  const selectedOrg=new URLSearchParams(location.search).get('org');
+  const ORG = String(selectedOrg&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(selectedOrg)?selectedOrg:(config.ORGANIZATION_SLUG || ''));
   const state = {
     store: { currency: 'ARS', name: 'Tienda' },
     offerings: [],
@@ -121,12 +122,21 @@
   }
 
   function cartTotal() {
-    let total = 0;
-    state.cart.forEach((qty, id) => {
-      const p = productById(id);
-      if (p) total += Number(p.price) * qty;
-    });
-    return total;
+    let cents=0;const eligible=[];let count=0;
+    state.cart.forEach((qty,id)=>{const p=productById(id);if(!p)return;const price=Math.round(Number(p.price)*100);cents+=price*qty;if((p.type||'product')==='product'&&Number.isInteger(qty)&&qty>0){eligible.push({price,qty});count+=qty;}});
+    const promo=state.store.promotion;if(!promo||(promo.ends_at&&Date.now()>Date.parse(promo.ends_at)))return cents/100;
+    if(count===2)cents-=eligible.reduce((sum,p)=>sum+Math.round(p.price*p.qty*Number(promo.two_discount_percent||0)/100),0);
+    else if(promo.buy_three_pay_two){let free=Math.floor(count/3);for(const p of eligible.sort((a,b)=>a.price-b.price)){const n=Math.min(free,p.qty);cents-=n*p.price;free-=n;}}
+    return Math.max(0,cents/100);
+  }
+  function renderPromotion(){
+    const box=$('promotionBuilder');if(!box)return;const p=state.store.promotion;box.hidden=!p;if(!p)return;
+    box.replaceChildren();const title=document.createElement('h2');title.textContent=p.title;box.append(title);const note=document.createElement('p');note.textContent=[p.buy_three_pay_two?'Llevando 3, pagás 2 · gratis los de menor precio':null,p.two_discount_percent?`Llevando 2, ${p.two_discount_percent}% de descuento`:null].filter(Boolean).join(' · ');box.append(note);
+    if(p.ends_at){const end=document.createElement('small');end.textContent='Vigente hasta '+new Date(p.ends_at).toLocaleString('es-AR');box.append(end);}
+    const options=document.createElement('div');options.className='promotion-options';const fields=document.createElement('div');let selected=1;
+    const renderFields=()=>{fields.replaceChildren();for(let i=0;i<selected;i++){const label=document.createElement('label');label.textContent='Producto '+(i+1);const select=document.createElement('select');select.required=true;select.append(new Option('Seleccionar producto',''));state.offerings.filter(x=>x.available!==false&&(x.type||'product')==='product').forEach(item=>select.append(new Option(item.name+' · '+money(Number(item.price)),item.id)));label.append(select);fields.append(label);}};
+    [1,2,3].forEach(n=>{const button=document.createElement('button');button.type='button';button.textContent=n+' '+(n===1?'producto':'productos');button.setAttribute('aria-pressed',String(n===1));button.onclick=()=>{selected=n;options.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));renderFields();};options.append(button);});
+    const add=document.createElement('button');add.type='button';add.className='primary-link';add.textContent='Agregar selección al pedido';add.onclick=()=>{const selections=[...fields.querySelectorAll('select')];if(selections.some(e=>!e.value)){selections.find(e=>!e.value).reportValidity();return;}for(const e of selections){const id=Number(e.value);state.cart.set(id,(state.cart.get(id)||0)+1);}saveCart();renderCart();openCart();};box.append(options,fields,add);renderFields();
   }
 
   function filteredLocalRows() {
@@ -515,8 +525,10 @@
       document.title = state.store.name || 'Tienda';
       $('storeName').textContent = state.store.name || 'Tienda';
       $('footerStore').textContent = state.store.name || 'Tienda';
-      $('headline').textContent = state.store.headline || 'Productos y servicios';
+      if($('headline'))$('headline').textContent = state.store.headline || 'Productos y servicios';
 
+      if(/^#[0-9a-f]{6}$/i.test(state.store.brand_color||''))document.documentElement.style.setProperty('--store-accent',state.store.brand_color);
+      renderPromotion();
       renderCategories();
       renderCatalog();
       renderCart();
