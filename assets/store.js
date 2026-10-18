@@ -510,7 +510,7 @@
         headers: { Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+portal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+portal)}:{}) }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      }catch(error){if(!config.CATALOG_SNAPSHOT)throw error;response=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(!response.ok)throw Error('No se pudo cargar la última consulta de Fudo.');}
+      }catch(error){if(!config.CATALOG_SNAPSHOT)throw error;response=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(!response.ok)throw Error('No se pudo cargar la última consulta del catálogo.');}
       let data = await response.json();
       if(config.CATALOG_SNAPSHOT&&(!Array.isArray(data.offerings)||!data.offerings.length)){const fallback=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(fallback.ok)data=await fallback.json();}
       if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
@@ -536,7 +536,7 @@
       if($('headline'))$('headline').textContent = state.store.headline || 'Productos y servicios';
 
       if(/^#[0-9a-f]{6}$/i.test(state.store.brand_color||''))document.documentElement.style.setProperty('--store-accent',state.store.brand_color);
-      if(portal==='nutrigo-parana'){const banner=document.querySelector('.store-announcement');if(banner){const date=state.store.last_synced_at?new Date(state.store.last_synced_at).toLocaleString('es-AR'):'';banner.textContent=(data.snapshot?'Última consulta de Fudo':'Catálogo sincronizado desde Fudo')+(date?' · '+date:'')+' · Solo consulta';}}
+      if(portal==='nutrigo-parana'){const banner=document.querySelector('.store-announcement');if(banner){const date=state.store.last_synced_at?new Date(state.store.last_synced_at).toLocaleString('es-AR'):'';banner.textContent=(data.snapshot?'Última consulta del catálogo':'Catálogo actualizado')+(date?' · '+date:'')+' · Solo consulta';}}
       renderPromotion();
       renderCategories();
       renderCatalog();
