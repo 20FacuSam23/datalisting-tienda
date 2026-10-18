@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="Nuts · Catálogo de productos naturales y dietéticos">
+  <title>Nuts · Productos naturales y dietéticos</title>
+  <link rel="stylesheet" href="../assets/store.css?v=20261018-nuts1">
+<link rel="stylesheet" href="../assets/store-modern.css?v=20261018-nuts1"></head>
+<body>
+  <div class="store-announcement">Tu selección, tus beneficios · promociones sujetas a vigencia</div><div class="privacy-shield" id="privacyShield" aria-hidden="true">
+    <div>
+      <strong>Contenido protegido</strong>
+      <span>Volvé a Nuts para continuar.</span>
+    </div>
+  </div>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Inicio">
+      <span class="brand-mark">N</span>
+      <span><strong id="storeName">Nuts</strong><small>Productos naturales y dietéticos</small></span>
+    </a>
+    <button class="cart-button" id="cartButton" type="button" aria-controls="cartDrawer">
+      Pedido <span id="cartCount">0</span>
+    </button>
+  </header>
+
+  <main><section id="promotionBuilder" class="promotion-builder" hidden></section>
+    <section class="store-entry" id="inicio">
+      <div class="store-entry-layout">
+        <div class="store-entry-card">
+          <p class="eyebrow">NUTS</p>
+          <h1>Naturales, como vos.</h1>
+          <p class="store-entry-lead">Productos naturales y dietéticos en un solo lugar.</p>
+          <p class="store-entry-copy">Explorá nuestro catálogo y encontrá productos para tu alimentación diaria.</p>
+          <a class="primary-link store-entry-button" href="#catalogo">Ingresar al catálogo</a>
+        </div>
+
+        <div class="store-entry-visual" aria-hidden="true">
+          <canvas id="heroCanvas"></canvas>
+          <div class="orbit orbit-a"></div>
+          <div class="orbit orbit-b"></div>
+          <div class="data-card data-card-a"><small>CATÁLOGO</small><strong>+1.000</strong><span>productos conectados</span></div>
+          <div class="data-card data-card-b"><small>PRECIOS</small><strong>Dinámicos</strong><span>actualizados desde Datalisting</span></div>
+          <div class="data-card data-card-c"><small>PEDIDOS</small><strong>Online</strong><span>carrito y gestión integrada</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="catalogo" class="catalog-section catalog-simple">
+      <div class="catalog-title">
+        <p class="eyebrow">CATÁLOGO</p>
+        <h2>Productos y servicios</h2>
+        <p><strong id="heroCount">—</strong> disponibles en la tienda.</p>
+      </div>
+
+      <section class="toolbar toolbar-simple" aria-label="Buscar productos y servicios">
+        <label class="search search-main">
+          <span>Buscar</span>
+          <input id="searchInput" type="search" placeholder="¿Qué estás buscando?" autocomplete="off">
+        </label>
+      </section>
+
+      <section class="status" id="status">Cargando catálogo…</section>
+      <section class="catalog" id="catalog" aria-live="polite"></section>
+      <div class="load-more-wrap"><button class="secondary-link load-more" id="loadMoreButton" type="button" hidden>Cargar más</button></div>
+    </section>
+  </main>
+
+  <aside class="drawer" id="cartDrawer" aria-hidden="true">
+    <div class="drawer-head"><div><small>Tu selección</small><h2>Pedido</h2></div><button class="icon-button" id="closeCart" type="button" aria-label="Cerrar">×</button></div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-empty" id="cartEmpty">Todavía no agregaste productos.</div>
+    <div class="cart-summary"><span>Total estimado</span><strong id="cartTotal">$ 0</strong></div>
+    <button class="checkout-button" id="checkoutButton" type="button">Continuar pedido</button>
+  </aside>
+  <button class="backdrop" id="backdrop" type="button" aria-label="Cerrar"></button>
+
+  <dialog class="product-detail-dialog" id="productDialog">
+    <div class="product-detail-shell">
+      <button class="icon-button product-detail-close" id="closeProductDialog" type="button" aria-label="Cerrar">×</button>
+      <div id="productDialogContent"></div>
+    </div>
+  </dialog>
+
+  <dialog class="checkout" id="checkoutDialog">
+    <form class="checkout-card" id="checkoutForm">
+      <div class="drawer-head"><div><small>Último paso</small><h2>Datos del pedido</h2></div><button class="icon-button" id="closeCheckout" type="button" aria-label="Cerrar">×</button></div>
+      <div class="checkout-grid">
+        <label>Nombre<input name="customer_name" required maxlength="150" autocomplete="name"></label>
+        <label>Email<input name="customer_email" type="email" maxlength="255" autocomplete="email"></label>
+        <label>Teléfono<input name="customer_phone" maxlength="60" autocomplete="tel"></label>
+        <label class="full">Notas<textarea name="notes" maxlength="2000" rows="4" placeholder="Entrega, variantes, horario, etc."></textarea></label>
+      </div>
+      <p class="form-help">Indicá al menos email o teléfono para que puedan contactarte.</p>
+      <div class="checkout-total"><span>Total estimado</span><strong id="checkoutTotal">$ 0</strong></div>
+      <button class="checkout-button" id="sendOrderButton" type="button">Enviar pedido</button>
+      <p class="form-message" id="formMessage" role="status"></p>
+    </form>
+  </dialog>
+
+  <footer><span id="footerStore">Nuts</span><span>·</span><span>Tienda online</span><a id="manageStoreLink" href="../gestion/">Administrar tienda</a></footer>
+  <script src="config.js?v=20261018-nuts1"></script>
+  <script>document.getElementById('manageStoreLink').href='../gestion/?portal='+encodeURIComponent(new URLSearchParams(location.search).get('portal')||window.DATALISTING_STORE.PORTAL_SLUG||'tienda-generica');</script><script src="../assets/store.js?v=20261018-nuts1"></script>
+  <script src="../assets/hero.js?v=20261018-nuts1"></script>
+</body>
+</html>
