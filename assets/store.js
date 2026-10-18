@@ -1,7 +1,27 @@
 (() => {
   'use strict';
 
-  const config = window.DATALISTING_STORE || {};
+  const query = new URLSearchParams(location.search);
+  const baseConfig = window.DATALISTING_STORE || {};
+  const requestedPortal = query.get('portal') || baseConfig.PORTAL_SLUG;
+  const selectedOrg = query.get('org');
+  const identity = !selectedOrg && (baseConfig.PORTALS?.[requestedPortal]
+    || Object.values(baseConfig.PORTALS || {}).find(item => item.API_PORTAL_SLUG === requestedPortal));
+  const config = { ...baseConfig, ...identity };
+  const portal = identity?.PORTAL_SLUG || requestedPortal;
+  const apiPortal = identity?.API_PORTAL_SLUG || portal;
+  const publicText = value => window.datalistingCatalogText(value, !!identity);
+  if (identity && requestedPortal !== portal) {
+    const canonical = new URL(location.href);
+    canonical.searchParams.set('portal', portal);
+    history.replaceState(null, '', canonical);
+  }
+  const manageLink = document.getElementById('manageStoreLink');
+  if (manageLink) {
+    const target = new URL(manageLink.getAttribute('href'), location.href);
+    target.searchParams.set('portal', portal || 'tienda-generica');
+    manageLink.href = target.href;
+  }
 
   // Datalisting storefront privacy guard.
   // Web browsers cannot fully block OS screenshots, but this reduces accidental capture/copy/print.
@@ -44,10 +64,9 @@
   });
 
   const API_BASE = String(config.API_BASE_URL || '').replace(/\/$/, '');
-  const query=new URLSearchParams(location.search);const portal=query.get('portal')||config.PORTAL_SLUG;const selectedOrg=query.get('org');
   const ORG = String(selectedOrg&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(selectedOrg)?selectedOrg:(config.ORGANIZATION_SLUG || ''));
-  const ENDPOINT=portal&&!selectedOrg?`${API_BASE}/api/portales/${encodeURIComponent(/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(portal)?portal:'tienda-generica')}`:`${API_BASE}/api/storefront/${encodeURIComponent(ORG)}`;
-  if(portal&&!selectedOrg)fetch(`${API_BASE}/api/portales/${encodeURIComponent(portal)}/brand`).then(r=>r.ok?r.json():null).then(d=>{if(d?.hosted_url&&location.hostname.endsWith('github.io'))location.replace(d.hosted_url);}).catch(()=>{});
+  const ENDPOINT=portal&&!selectedOrg?`${API_BASE}/api/portales/${encodeURIComponent(/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(apiPortal)?apiPortal:'tienda-generica')}`:`${API_BASE}/api/storefront/${encodeURIComponent(ORG)}`;
+  if(portal&&!selectedOrg)fetch(`${API_BASE}/api/portales/${encodeURIComponent(apiPortal)}/brand`).then(r=>r.ok?r.json():null).then(d=>{if(d?.hosted_url&&location.hostname.endsWith('github.io'))location.replace(d.hosted_url);}).catch(()=>{});
   const state = {
     store: { currency: 'ARS', name: 'Tienda' },
     offerings: [],
@@ -81,7 +100,7 @@
   const loadMoreButton = $('loadMoreButton');
   const productDialog = $('productDialog');
   const productDialogContent = $('productDialogContent');
-  const storageKey = `datalisting-cart:${portal&&!selectedOrg?portal:ORG}`;
+  const storageKey = `datalisting-cart:${portal&&!selectedOrg?apiPortal:ORG}`;
 
   function money(value) {
     try {
@@ -111,7 +130,7 @@
       state.cart = new Map(raw.map(([id, qty]) => [Number(id), Number(qty)]).filter(([id, qty]) => Number.isFinite(id) && Number.isFinite(qty) && qty > 0));
       const cached = JSON.parse(localStorage.getItem(`${storageKey}:products`) || '[]');
       if (Array.isArray(cached)) cached.forEach(item => {
-        if (Number.isFinite(Number(item.id))) state.knownProducts.set(Number(item.id), item);
+        if (Number.isFinite(Number(item.id))) state.knownProducts.set(Number(item.id), { ...item, name: publicText(item.name) });
       });
     } catch (_) {
       state.cart = new Map();
@@ -133,7 +152,7 @@
   }
   function renderPromotion(){
     const box=$('promotionBuilder');if(!box)return;const p=state.store.promotion;box.hidden=!p;if(!p)return;
-    box.replaceChildren();const title=document.createElement('h2');title.textContent=p.title;box.append(title);const note=document.createElement('p');note.textContent=[p.buy_three_pay_two?'Llevando 3, pagás 2 · gratis los de menor precio':null,p.two_discount_percent?`Llevando 2, ${p.two_discount_percent}% de descuento`:null].filter(Boolean).join(' · ');box.append(note);
+    box.replaceChildren();const title=document.createElement('h2');title.textContent=publicText(p.title);box.append(title);const note=document.createElement('p');note.textContent=[p.buy_three_pay_two?'Llevando 3, pagás 2 · gratis los de menor precio':null,p.two_discount_percent?`Llevando 2, ${p.two_discount_percent}% de descuento`:null].filter(Boolean).join(' · ');box.append(note);
     if(p.ends_at){const end=document.createElement('small');end.textContent='Vigente hasta '+new Date(p.ends_at).toLocaleString('es-AR');box.append(end);}
     const options=document.createElement('div');options.className='promotion-options';const fields=document.createElement('div');let selected=1;
     const renderFields=()=>{fields.replaceChildren();for(let i=0;i<selected;i++){const label=document.createElement('label');label.textContent='Producto '+(i+1);const select=document.createElement('select');select.required=true;select.append(new Option('Seleccionar producto',''));state.offerings.filter(x=>x.available!==false&&(x.type||'product')==='product').forEach(item=>select.append(new Option(item.name+' · '+money(Number(item.price)),item.id)));label.append(select);fields.append(label);}};
@@ -507,19 +526,24 @@
 
     try {
       let response;try{response = await fetch(`${ENDPOINT}/catalog?${params}`, {
-        headers: { Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+portal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+portal)}:{}) }
+        headers: { Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+apiPortal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+apiPortal)}:{}) }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       }catch(error){if(!config.CATALOG_SNAPSHOT)throw error;response=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(!response.ok)throw Error('No se pudo cargar la última consulta del catálogo.');}
       let data = await response.json();
       if(config.CATALOG_SNAPSHOT&&(!Array.isArray(data.offerings)||!data.offerings.length)){const fallback=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(fallback.ok)data=await fallback.json();}
       if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(data.snapshot)state.store={...state.store,catalog_read_only:true};if(config.BRAND_NAME){state.store={...state.store,name:config.BRAND_NAME,headline:config.BRAND_HEADLINE||state.store.headline,logo_url:config.BRAND_LOGO_URL||null};const mark=document.querySelector('.brand-mark');if(mark)mark.textContent=config.BRAND_INITIAL||config.BRAND_NAME.slice(0,1);const tagline=document.querySelector('.brand small');if(tagline&&config.BRAND_TAGLINE)tagline.textContent=config.BRAND_TAGLINE;}if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
-      const incoming = Array.isArray(data.offerings) ? data.offerings : [];
+      const incoming = Array.isArray(data.offerings) ? data.offerings.map(item => ({
+        ...item,
+        name: publicText(item.name),
+        description: publicText(item.description),
+        category: item.category ? { ...item.category, name: publicText(item.category.name) } : item.category
+      })) : [];
       incoming.forEach(item => state.knownProducts.set(Number(item.id), item));
       if (state.cart.size) saveCart();
       state.serverPaging = Boolean(data.pagination);
       state.offerings = reset ? incoming : [...state.offerings, ...incoming.filter(x => !state.offerings.some(y => Number(y.id) === Number(x.id)))];
-      state.categories = Array.isArray(data.categories) ? data.categories : state.categories;
+      state.categories = Array.isArray(data.categories) ? data.categories.map(item => ({ ...item, name: publicText(item.name) })) : state.categories;
       if (!state.categories.length) {
         const derived = new Map();
         state.offerings.forEach(x => { if (x.category?.slug) derived.set(x.category.slug, x.category); });
@@ -536,7 +560,7 @@
       if($('headline'))$('headline').textContent = state.store.headline || 'Productos y servicios';
 
       if(/^#[0-9a-f]{6}$/i.test(state.store.brand_color||''))document.documentElement.style.setProperty('--store-accent',state.store.brand_color);
-      if(portal==='nutrigo-parana'){const banner=document.querySelector('.store-announcement');if(banner){const date=state.store.last_synced_at?new Date(state.store.last_synced_at).toLocaleString('es-AR'):'';banner.textContent=(data.snapshot?'Última consulta del catálogo':'Catálogo actualizado')+(date?' · '+date:'')+(state.store.catalog_read_only||config.CATALOG_READ_ONLY?' · Solo consulta':' · Armá tu pedido');}}
+      if(config.CATALOG_SNAPSHOT){const banner=document.querySelector('.store-announcement');if(banner){const date=state.store.last_synced_at?new Date(state.store.last_synced_at).toLocaleString('es-AR'):'';banner.textContent=(data.snapshot?'Última consulta del catálogo':'Catálogo actualizado')+(date?' · '+date:'')+(state.store.catalog_read_only||config.CATALOG_READ_ONLY?' · Solo consulta':' · Armá tu pedido');}}
       renderPromotion();
       renderCategories();
       renderCatalog();
@@ -576,13 +600,13 @@
     try {
       const response = await fetch(`${ENDPOINT}/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+portal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+portal)}:{}) },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+apiPortal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+apiPortal)}:{}) },
         body: JSON.stringify(payload)
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
         const first = result?.errors ? Object.values(result.errors).flat()[0] : result.message;
-        throw new Error(first || 'No se pudo enviar el pedido.');
+        throw new Error(publicText(first) || 'No se pudo enviar el pedido.');
       }
       state.cart.clear();
       saveCart();
@@ -607,7 +631,7 @@
       }
     } catch (error) {
       formMessage.classList.add('error');
-      formMessage.textContent = error.message || 'No se pudo enviar el pedido.';
+      formMessage.textContent = publicText(error.message) || 'No se pudo enviar el pedido.';
     } finally {
       sendOrderButton.disabled = false;
       sendOrderButton.textContent = 'Enviar pedido';

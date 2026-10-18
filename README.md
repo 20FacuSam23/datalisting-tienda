@@ -17,6 +17,8 @@ No contiene claves privadas ni contraseñas. Las cuentas de propuesta cambian su
 
 ## Nuts
 
-`/nuts/` presenta el catálogo de productos naturales y dietéticos. Prioriza los datos sincronizados de Datalisting y dispone de una copia de consulta fechada.
+`/nuts/` es la tienda de productos naturales y dietéticos, con identidad propia, catálogo, fichas de producto y carrito. El servidor confirma la disponibilidad y registra los pedidos cuando la tienda los tiene habilitados. El envío de un pedido no realiza un cobro automático.
 
-La administración de la tienda permite actualizar el catálogo y conservar los productos y precios cargados manualmente.
+Prioriza el catálogo sincronizado de Datalisting. Si el servidor no está disponible, muestra la última consulta guardada y su fecha; esa copia permite consultar productos y mantiene deshabilitado el envío de pedidos. Las imágenes conservan sus proporciones en las tarjetas y el detalle.
+
+El enlace **Administrar tienda** abre la gestión de Nuts. El botón **Actualizar catálogo** sincroniza los productos; se conservan los productos manuales y los precios editados manualmente. Los identificadores internos de conexión mantienen la continuidad del catálogo, las cuentas y los pedidos.
