@@ -513,7 +513,7 @@
       }catch(error){if(!config.CATALOG_SNAPSHOT)throw error;response=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(!response.ok)throw Error('No se pudo cargar la última consulta del catálogo.');}
       let data = await response.json();
       if(config.CATALOG_SNAPSHOT&&(!Array.isArray(data.offerings)||!data.offerings.length)){const fallback=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(fallback.ok)data=await fallback.json();}
-      if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
+      if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(config.BRAND_NAME){state.store={...state.store,name:config.BRAND_NAME,headline:config.BRAND_HEADLINE||state.store.headline,logo_url:config.BRAND_LOGO_URL||null};const mark=document.querySelector('.brand-mark');if(mark)mark.textContent=config.BRAND_INITIAL||config.BRAND_NAME.slice(0,1);const tagline=document.querySelector('.brand small');if(tagline&&config.BRAND_TAGLINE)tagline.textContent=config.BRAND_TAGLINE;}if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
       const incoming = Array.isArray(data.offerings) ? data.offerings : [];
       incoming.forEach(item => state.knownProducts.set(Number(item.id), item));
       if (state.cart.size) saveCart();
