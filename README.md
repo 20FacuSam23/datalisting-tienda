@@ -14,3 +14,9 @@ La promoción 3x2 combina productos y descuenta las unidades más económicas. C
 Solo al confirmar la fidelización se incorpora el cliente: conserva catálogo, cuentas y pedidos, sincroniza los módulos operativos y se sirve la misma plataforma desde `https://datalisting.info/portales/identificador/`. La publicación requiere autorización. La página GitHub redirige al alojamiento propio después de incorporar.
 
 No contiene claves privadas ni contraseñas. Las cuentas de propuesta cambian sus contraseñas dentro de su propia interfaz. Matriz puede restablecerlas y administrar cada portal.
+
+## Nuts
+
+`/nuts/` presenta el catálogo de productos naturales y dietéticos. Prioriza los datos sincronizados de Datalisting y dispone de una copia de consulta fechada.
+
+La administración de la tienda permite actualizar el catálogo y conservar los productos y precios cargados manualmente.

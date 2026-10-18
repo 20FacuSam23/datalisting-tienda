@@ -151,6 +151,7 @@
       if (state.category !== 'all') {
         rows = rows.filter(item => item.category?.slug === state.category || String(item.category?.id || '') === state.category);
       }
+      if(state.availability==='available')rows=rows.filter(i=>i.available!==false);
       rows.sort((a, b) => {
         if (state.sort === 'price_asc') return Number(a.price) - Number(b.price);
         if (state.sort === 'price_desc') return Number(b.price) - Number(a.price);
@@ -163,6 +164,7 @@
 
   function renderProductActions(actions, item) {
     actions.replaceChildren();
+    if(config.CATALOG_READ_ONLY||state.store.catalog_read_only){const label=document.createElement('span');label.textContent=item.available===false?'No disponible':'Catálogo de consulta';actions.append(label);return;}
     const qty = state.cart.get(Number(item.id)) || 0;
     actions.classList.toggle('has-quantity', qty > 0);
 
@@ -219,9 +221,11 @@
 
   function renderCatalog() {
     catalog.replaceChildren();
-    const rows = filteredLocalRows();
+    const allRows = filteredLocalRows();
+    const rows = state.serverPaging?allRows:allRows.slice(0,state.page*state.perPage);
+    if(!state.serverPaging)state.hasMore=rows.length<allRows.length;
     const shown = rows.length;
-    const total = state.serverPaging ? state.total : shown;
+    const total = state.serverPaging ? state.total : allRows.length;
     status.textContent = state.loading
       ? 'Actualizando catálogo…'
       : total
@@ -372,7 +376,7 @@
     const add = document.createElement('button');
     add.className = 'checkout-button detail-add';
     add.type = 'button';
-    add.disabled = item.available === false;
+    add.disabled = item.available === false || !!config.CATALOG_READ_ONLY || !!state.store.catalog_read_only;
     add.textContent = item.available === false ? 'No disponible' : 'Agregar al pedido';
     add.addEventListener('click', () => {
       changeQty(item.id, 1);
@@ -464,7 +468,7 @@
     $('cartTotal').textContent = money(cartTotal());
     $('checkoutTotal').textContent = money(cartTotal());
     cartEmpty.hidden = count > 0;
-    checkoutButton.disabled = count === 0;
+    checkoutButton.disabled = count === 0 || !!state.store.catalog_read_only || !!config.CATALOG_READ_ONLY;
     syncCatalogQuantities();
   }
 
@@ -502,11 +506,13 @@
     if (state.category !== 'all') params.set('category', state.category);
 
     try {
-      const response = await fetch(`${ENDPOINT}/catalog?${params}`, {
+      let response;try{response = await fetch(`${ENDPOINT}/catalog?${params}`, {
         headers: { Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+portal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+portal)}:{}) }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      }catch(error){if(!config.CATALOG_SNAPSHOT)throw error;response=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(!response.ok)throw Error('No se pudo cargar la última consulta de Fudo.');}
+      let data = await response.json();
+      if(config.CATALOG_SNAPSHOT&&(!Array.isArray(data.offerings)||!data.offerings.length)){const fallback=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(fallback.ok)data=await fallback.json();}
       if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
       const incoming = Array.isArray(data.offerings) ? data.offerings : [];
       incoming.forEach(item => state.knownProducts.set(Number(item.id), item));
@@ -530,6 +536,7 @@
       if($('headline'))$('headline').textContent = state.store.headline || 'Productos y servicios';
 
       if(/^#[0-9a-f]{6}$/i.test(state.store.brand_color||''))document.documentElement.style.setProperty('--store-accent',state.store.brand_color);
+      if(portal==='nutrigo-parana'){const banner=document.querySelector('.store-announcement');if(banner){const date=state.store.last_synced_at?new Date(state.store.last_synced_at).toLocaleString('es-AR'):'';banner.textContent=(data.snapshot?'Última consulta de Fudo':'Catálogo sincronizado desde Fudo')+(date?' · '+date:'')+' · Solo consulta';}}
       renderPromotion();
       renderCategories();
       renderCatalog();
@@ -607,6 +614,7 @@
     }
   }
 
+  function refreshCatalog(){if(state.offerings.length&&!state.serverPaging){state.page=1;renderCatalog();}else loadCatalog({reset:true});}
   let searchTimer;
   $('cartButton').addEventListener('click', openCart);
   $('closeCart').addEventListener('click', closeCart);
@@ -622,30 +630,30 @@
   $('searchInput').addEventListener('input', e => {
     state.search = e.target.value;
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => loadCatalog({ reset: true }), 280);
+    searchTimer = setTimeout(() => refreshCatalog(), 280);
   });
   const sortSelect = $('sortSelect');
   if (sortSelect) sortSelect.addEventListener('change', e => {
     state.sort = e.target.value;
-    loadCatalog({ reset: true });
+    refreshCatalog();
   });
   const availabilitySelect = $('availabilitySelect');
   if (availabilitySelect) availabilitySelect.addEventListener('change', e => {
     state.availability = e.target.value;
-    loadCatalog({ reset: true });
+    refreshCatalog();
   });
   if (categoryFilters) categoryFilters.addEventListener('click', e => {
     const button = e.target.closest('[data-category]');
     if (!button) return;
     state.category = button.dataset.category;
-    loadCatalog({ reset: true });
+    refreshCatalog();
   });
   loadMoreButton.addEventListener('click', () => {
     state.page += 1;
-    loadCatalog({ reset: false });
+    if(!state.serverPaging)renderCatalog();else loadCatalog({ reset: false });
   });
 
   loadCart();
   renderCart();
-  loadCatalog({ reset: true });
+  refreshCatalog();
 })();
