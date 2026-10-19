@@ -532,7 +532,7 @@
       }catch(error){if(!config.CATALOG_SNAPSHOT)throw error;response=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(!response.ok)throw Error('No se pudo cargar la última consulta del catálogo.');}
       let data = await response.json();
       if(config.CATALOG_SNAPSHOT&&(!Array.isArray(data.offerings)||!data.offerings.length)){const fallback=await fetch(config.CATALOG_SNAPSHOT,{cache:'no-store'});if(fallback.ok)data=await fallback.json();}
-      if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(data.snapshot)state.store={...state.store,catalog_read_only:true};if(config.BRAND_NAME){state.store={...state.store,name:config.BRAND_NAME,headline:config.BRAND_HEADLINE||state.store.headline,logo_url:config.BRAND_LOGO_URL||null};const mark=document.querySelector('.brand-mark');if(mark)mark.textContent=config.BRAND_INITIAL||config.BRAND_NAME.slice(0,1);const tagline=document.querySelector('.brand small');if(tagline&&config.BRAND_TAGLINE)tagline.textContent=config.BRAND_TAGLINE;}if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
+      if(data.hosted_url&&location.hostname.endsWith('github.io')){location.replace(data.hosted_url);return;}state.store = data.store || state.store;if(!data.demo&&state.store.order_channel==='whatsapp'){sendOrderButton.textContent='Guardar y abrir WhatsApp';checkoutButton.textContent='Continuar por WhatsApp';}if(data.snapshot)state.store={...state.store,catalog_read_only:true};if(config.BRAND_NAME){state.store={...state.store,name:config.BRAND_NAME,headline:config.BRAND_HEADLINE||state.store.headline,logo_url:config.BRAND_LOGO_URL||null};const mark=document.querySelector('.brand-mark');if(mark)mark.textContent=config.BRAND_INITIAL||config.BRAND_NAME.slice(0,1);const tagline=document.querySelector('.brand small');if(tagline&&config.BRAND_TAGLINE)tagline.textContent=config.BRAND_TAGLINE;}if(data.demo){const b=document.querySelector('.store-announcement');if(b)b.textContent='Tienda de demostración · Pedidos simulados · Sin cobros reales';}
       const incoming = Array.isArray(data.offerings) ? data.offerings.map(item => ({
         ...item,
         name: publicText(item.name),
@@ -574,7 +574,22 @@
     }
   }
 
+  async function checkoutRequestKey(payload) {
+    const raw = JSON.stringify(payload);
+    if (!window.crypto?.subtle) {
+      if (state.checkoutRaw !== raw) { state.checkoutRaw = raw; state.checkoutKey = crypto.randomUUID(); }
+      return state.checkoutKey;
+    }
+    const fingerprint = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw)))].map(byte => byte.toString(16).padStart(2, '0')).join('');
+    const key = storageKey + ':checkout';
+    try { const saved = JSON.parse(sessionStorage.getItem(key) || 'null'); if (saved?.fingerprint === fingerprint) return saved.requestKey; } catch {}
+    const requestKey = crypto.randomUUID();
+    try { sessionStorage.setItem(key, JSON.stringify({ fingerprint, requestKey })); } catch {}
+    return requestKey;
+  }
+
   async function sendOrder() {
+    if (state.submitting) return;
     formMessage.className = 'form-message';
     formMessage.textContent = '';
     if (!state.cart.size) return;
@@ -595,9 +610,18 @@
       notes: String(data.get('notes') || '').trim() || null,
       items: [...state.cart.entries()].map(([offering_id, quantity]) => ({ offering_id, quantity })),
     };
+    state.submitting = true;
     sendOrderButton.disabled = true;
-    sendOrderButton.textContent = 'Enviando…';
+    sendOrderButton.textContent = 'Guardando pedido…';
+    let chatWindow = null;
+    if (state.store.order_channel === 'whatsapp' && state.store.whatsapp_configured) {
+      try {
+        chatWindow = window.open('', '_blank');
+        if (chatWindow) { chatWindow.opener = null; chatWindow.document.title = 'Tu pedido'; chatWindow.document.body.textContent = 'Guardando tu pedido antes de abrir WhatsApp…'; }
+      } catch { chatWindow = null; }
+    }
     try {
+      payload.request_key = await checkoutRequestKey(payload);
       const response = await fetch(`${ENDPOINT}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+apiPortal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+apiPortal)}:{}) },
@@ -620,21 +644,30 @@
       const text = document.createElement('span');
       text.textContent = `${result.simulated?'Pedido de demostración registrado. No se realizó ningún cobro.':'Pedido recibido.'} Código ${String(result.order_id || '').slice(0, 8)}${finalTotal}${customerPricing}${emailText}.${pendingText}`;
       formMessage.append(text);
-      if (result.whatsapp_url) {
+      let whatsapp = null;
+      try { const url = new URL(result.whatsapp_url); if (url.origin === 'https://wa.me' && /^\/[1-9][0-9]{7,14}\/?$/.test(url.pathname)) whatsapp = url.href; } catch {}
+      if (whatsapp && !result.simulated) {
         const link = document.createElement('a');
         link.className = 'whatsapp-order-link';
-        link.href = result.whatsapp_url;
+        link.href = whatsapp;
         link.target = '_blank';
-        link.rel = 'noopener';
-        link.textContent = 'Enviar también por WhatsApp';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'Abrir WhatsApp con mi pedido';
         formMessage.append(document.createElement('br'), link);
+        if (chatWindow && !chatWindow.closed) chatWindow.location.replace(whatsapp);
+        else window.location.assign(whatsapp);
+      } else {
+        chatWindow?.close();
+        if (result.whatsapp_pending_configuration) { const pending = document.createElement('p'); pending.textContent = 'El pedido quedó guardado. La tienda todavía debe completar su WhatsApp; conservá el código del pedido.'; formMessage.append(pending); }
       }
     } catch (error) {
+      chatWindow?.close();
       formMessage.classList.add('error');
       formMessage.textContent = publicText(error.message) || 'No se pudo enviar el pedido.';
     } finally {
+      state.submitting = false;
       sendOrderButton.disabled = false;
-      sendOrderButton.textContent = 'Enviar pedido';
+      sendOrderButton.textContent = state.store.order_channel === 'whatsapp' ? 'Guardar y abrir WhatsApp' : 'Enviar pedido';
     }
   }
 
