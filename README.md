@@ -22,3 +22,11 @@ No contiene claves privadas ni contraseñas. Las cuentas de propuesta cambian su
 Prioriza el catálogo sincronizado de Datalisting. Si el servidor no está disponible, muestra la última consulta guardada y su fecha; esa copia permite consultar productos y mantiene deshabilitado el envío de pedidos. Las imágenes conservan sus proporciones en las tarjetas y el detalle.
 
 El enlace **Administrar tienda** abre la gestión de Nuts. El botón **Actualizar catálogo** sincroniza los productos; se conservan los productos manuales y los precios editados manualmente. Los identificadores internos de conexión mantienen la continuidad del catálogo, las cuentas y los pedidos.
+
+## Muestras, accesos y pedidos por WhatsApp
+
+La actualización de accesos permite probar la administración sin claves con ejemplos en memoria, únicamente cuando el backend confirma que es una muestra sin cuentas ni contenido propio. Las cuentas reales tienen recuperación por correo y control de reseteos desde Matriz.
+
+En Nuts, el dueño configura el WhatsApp para recibir pedidos en su administración. El servidor guarda y calcula el pedido antes de abrir el chat, con código y total confirmado. Un doble toque o reintento con la misma clave de envío conserva el mismo registro. La persona confirma el envío dentro de WhatsApp; el pago permanece pendiente. Los pedidos simulados no abren chats ni realizan cobros.
+
+Validación del recorrido de muestra: `node --test tests/demo.test.cjs`.
