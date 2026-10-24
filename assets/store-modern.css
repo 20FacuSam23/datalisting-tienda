@@ -9,3 +9,107 @@
 .product-media img{position:absolute;inset:0;display:block;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;object-fit:contain;object-position:center;padding:12px;transform:none!important;}
 .product-detail-media{position:relative;overflow:hidden;}
 .product-detail-media img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;}
+
+/* Colores completos del tema claro, incluidos controles y fichas. */
+:root {
+  color-scheme: light;
+  --brand-ink: #ffffff;
+  --brand-surface: #ffffff;
+  --brand-surface-2: #f6f8fc;
+  --brand-surface-3: #edf3f8;
+  --brand-text: #173247;
+  --brand-muted: #52677d;
+  --brand-line: #cbd7e4;
+  --store-accent-2: #196b4b;
+  --danger: #b42335;
+  --shadow: 0 18px 56px rgba(23, 50, 71, .16);
+}
+
+body .cart-button {
+  background: #edf6f1;
+  color: var(--text);
+  border-color: #a8cbbb;
+}
+
+.cart-button span {
+  background: #196b4b;
+  color: #ffffff;
+}
+
+.product-title-button {
+  color: inherit;
+}
+
+.product p,
+.product-desc {
+  color: var(--muted);
+}
+
+.product-type,
+.eyebrow,
+.detail-stock {
+  color: #196b4b;
+}
+
+.product-qty-button {
+  background: #def0e6;
+  color: #174c3b;
+}
+
+.product-qty-count {
+  color: #174c3b;
+}
+
+.product-detail-shell,
+.product-detail-info {
+  background: #ffffff;
+  color: var(--text);
+}
+
+.product-detail-info h2,
+.product-detail-price strong {
+  color: var(--text);
+}
+
+.product-detail-description {
+  color: var(--muted);
+}
+
+.product-detail-close,
+.secondary-link,
+.form-message .whatsapp-order-link {
+  background: #f1f6fa;
+  color: var(--text);
+}
+
+.form-message.success {
+  color: #196b4b;
+}
+
+.unavailable-text {
+  color: var(--danger);
+}
+
+.search input::placeholder,
+.checkout-grid input::placeholder,
+.checkout-grid textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+footer {
+  background: #f6f8fc;
+}
+
+footer a {
+  color: #196b4b;
+}
+
+.new-order-button {
+  width: 100%;
+  margin: 14px 0;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+

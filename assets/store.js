@@ -101,6 +101,8 @@
   const productDialog = $('productDialog');
   const productDialogContent = $('productDialogContent');
   const storageKey = `datalisting-cart:${portal&&!selectedOrg?apiPortal:ORG}`;
+  const cartMaxAge = 24 * 60 * 60 * 1000;
+  let cartUpdatedAt = 0;
 
   function money(value) {
     try {
@@ -114,26 +116,55 @@
     }
   }
 
-  function saveCart() {
-    localStorage.setItem(storageKey, JSON.stringify([...state.cart.entries()]));
-    // Keep only selected-product snapshots so the cart survives catalog filters and reloads.
+  function clearSavedCart() {
+    cartUpdatedAt = 0;
+    try {
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(`${storageKey}:products`);
+      localStorage.removeItem(`${storageKey}:updatedAt`);
+    } catch (_) {
+      // El pedido sigue funcionando si el navegador bloquea el almacenamiento.
+    }
+  }
+
+  function saveCart({ touch = true } = {}) {
+    if (!state.cart.size) {
+      clearSavedCart();
+      return;
+    }
+    if (touch) cartUpdatedAt = Date.now();
+    // La fecha cambia al editar el pedido, no al buscar o recargar el catálogo.
     const selected = [...state.cart.keys()]
       .map(id => productById(id))
       .filter(Boolean)
       .map(({ id, name, price, unit }) => ({ id, name, price, unit }));
-    localStorage.setItem(`${storageKey}:products`, JSON.stringify(selected));
+    try {
+      localStorage.setItem(storageKey, JSON.stringify([...state.cart.entries()]));
+      localStorage.setItem(`${storageKey}:products`, JSON.stringify(selected));
+      localStorage.setItem(`${storageKey}:updatedAt`, String(cartUpdatedAt));
+    } catch (_) {
+      // El almacenamiento es opcional; nunca debe impedir agregar productos.
+    }
   }
 
   function loadCart() {
     try {
+      const savedAt = Number(localStorage.getItem(`${storageKey}:updatedAt`));
+      const age = Date.now() - savedAt;
+      if (!savedAt || !Number.isFinite(age) || age < 0 || age >= cartMaxAge) {
+        clearSavedCart();
+        return;
+      }
       const raw = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      state.cart = new Map(raw.map(([id, qty]) => [Number(id), Number(qty)]).filter(([id, qty]) => Number.isFinite(id) && Number.isFinite(qty) && qty > 0));
+      state.cart = new Map(raw.filter(entry => Array.isArray(entry) && entry.length === 2).map(([id, qty]) => [Number(id), Number(qty)]).filter(([id, qty]) => Number.isFinite(id) && id > 0 && Number.isFinite(qty) && qty > 0));
+      cartUpdatedAt = savedAt;
       const cached = JSON.parse(localStorage.getItem(`${storageKey}:products`) || '[]');
       if (Array.isArray(cached)) cached.forEach(item => {
-        if (Number.isFinite(Number(item.id))) state.knownProducts.set(Number(item.id), { ...item, name: publicText(item.name) });
+        if (item && state.cart.has(Number(item.id))) state.knownProducts.set(Number(item.id), { ...item, name: publicText(item.name) });
       });
     } catch (_) {
       state.cart = new Map();
+      clearSavedCart();
     }
   }
 
@@ -487,6 +518,8 @@
     $('cartTotal').textContent = money(cartTotal());
     $('checkoutTotal').textContent = money(cartTotal());
     cartEmpty.hidden = count > 0;
+    const resetButton = $('resetCartButton');
+    if (resetButton) resetButton.hidden = count === 0;
     checkoutButton.disabled = count === 0 || !!state.store.catalog_read_only || !!config.CATALOG_READ_ONLY;
     syncCatalogQuantities();
   }
@@ -540,7 +573,7 @@
         category: item.category ? { ...item.category, name: publicText(item.category.name) } : item.category
       })) : [];
       incoming.forEach(item => state.knownProducts.set(Number(item.id), item));
-      if (state.cart.size) saveCart();
+      if (state.cart.size) saveCart({ touch: false });
       state.serverPaging = Boolean(data.pagination);
       state.offerings = reset ? incoming : [...state.offerings, ...incoming.filter(x => !state.offerings.some(y => Number(y.id) === Number(x.id)))];
       state.categories = Array.isArray(data.categories) ? data.categories.map(item => ({ ...item, name: publicText(item.name) })) : state.categories;
@@ -642,6 +675,15 @@
   let searchTimer;
   $('cartButton').addEventListener('click', openCart);
   $('closeCart').addEventListener('click', closeCart);
+  $('resetCartButton')?.addEventListener('click', () => {
+    state.cart.clear();
+    saveCart();
+    renderCart();
+    $('checkoutForm').reset();
+    formMessage.className = 'form-message';
+    formMessage.replaceChildren();
+    closeCart();
+  });
   backdrop.addEventListener('click', closeCart);
   checkoutButton.addEventListener('click', () => { closeCart(); checkoutDialog.showModal(); });
   $('closeCheckout').addEventListener('click', () => checkoutDialog.close());
@@ -681,3 +723,4 @@
   renderCart();
   refreshCatalog();
 })();
+
