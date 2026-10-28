@@ -2,6 +2,7 @@
   'use strict';
 
   const query = new URLSearchParams(location.search);
+  const portfolioPreview = window.self !== window.top && query.get('vista') === 'portfolio';
   const baseConfig = window.DATALISTING_STORE || {};
   const requestedPortal = query.get('portal') || baseConfig.PORTAL_SLUG;
   const selectedOrg = query.get('org');
@@ -34,10 +35,10 @@
     }
   }
 
-  window.addEventListener('blur', () => setPrivacyHidden(true));
+  window.addEventListener('blur', () => { if (!portfolioPreview) setPrivacyHidden(true); });
   window.addEventListener('focus', () => setPrivacyHidden(false));
   document.addEventListener('visibilitychange', () => {
-    setPrivacyHidden(document.hidden);
+    if (!portfolioPreview) setPrivacyHidden(document.hidden);
   });
 
   document.addEventListener('contextmenu', (event) => {
@@ -52,7 +53,7 @@
     if (!event.target.closest('input, textarea')) event.preventDefault();
   });
 
-  window.addEventListener('beforeprint', () => setPrivacyHidden(true));
+  window.addEventListener('beforeprint', () => { if (!portfolioPreview) setPrivacyHidden(true); });
   window.addEventListener('afterprint', () => setPrivacyHidden(false));
 
   document.addEventListener('keydown', (event) => {
@@ -558,7 +559,7 @@
     if (state.category !== 'all') params.set('category', state.category);
 
     try {
-      let response;try{response = await fetch(`${ENDPOINT}/catalog?${params}`, {
+      let response;try{response = portfolioPreview && config.CATALOG_SNAPSHOT ? await fetch(config.CATALOG_SNAPSHOT,{cache:'force-cache'}) : await fetch(`${ENDPOINT}/catalog?${params}`, {
         headers: { Accept: 'application/json',...(portal&&sessionStorage.getItem('store-owner-'+apiPortal)?{Authorization:'Bearer '+sessionStorage.getItem('store-owner-'+apiPortal)}:{}) }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -599,7 +600,7 @@
       renderCatalog();
       renderCart();
     } catch (error) {
-      status.textContent = 'No se pudo cargar el catálogo. Revisá el backend o intentá nuevamente.';
+      status.textContent = portfolioPreview ? '' : 'No se pudo cargar el catálogo. Revisá el backend o intentá nuevamente.';
       console.error(error);
     } finally {
       state.loading = false;
