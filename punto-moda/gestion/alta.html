@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#2e1b33"><meta name="description" content="Carga guiada de productos y stock de Punto Moda, demostración sin servidor.">
+<title>Punto Moda · Cargar producto</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light;--wine:#43253d;--plum:#714865;--rose:#b57b9e;--ink:#36273b;--muted:#7a707d;--border:#e8dde6;--bg:#fbf8fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #bd89c0;outline-offset:2px}[hidden]{display:none!important}
+header{background:#fff;border-bottom:1px solid var(--border)}.top{max-width:680px;margin:auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink);font-weight:850}.brand img{width:48px;height:48px;object-fit:contain}.brand small{display:block;font-size:11px;font-weight:500;color:var(--muted)}.top a.back{font-size:12px;color:var(--plum);font-weight:800;text-decoration:none}
+main{max-width:680px;margin:auto;padding:23px 15px 65px}h1{font-size:clamp(26px,6vw,36px);margin:5px 0 6px;letter-spacing:-.05em}p{line-height:1.5}.muted{color:var(--muted);font-size:13px}.kicker{font-size:11px;letter-spacing:.15em;color:#9b5a8c;text-transform:uppercase;font-weight:900}
+.progress{display:flex;gap:6px;margin:23px 0 13px}.bar{height:6px;flex:1;border-radius:9px;background:#eae1eb}.bar.on{background:var(--plum)}.steps{display:flex;justify-content:space-between;align-items:center;color:#85788a;font-size:12px;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 15px 40px #452b3e09}.card h2{font-size:24px;margin:3px 0 6px;letter-spacing:-.04em}.card p{color:var(--muted);font-size:13px;margin:0 0 18px}
+.field{display:grid;gap:7px;font-size:13px;font-weight:800;margin:17px 0}.field input,.field select,.field textarea{width:100%;border:1px solid #d9cdda;background:#fff;border-radius:11px;padding:13px 14px;min-height:46px;color:var(--ink);font-weight:500}.field small{font-weight:500;color:var(--muted);line-height:1.45}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:16px 0}.choice{background:white;color:#593e59;border:1.5px solid #d7cbd9;border-radius:13px;padding:15px;text-align:left;font-size:13px;font-weight:800}.choice[aria-pressed=true]{border-color:#814b7f;background:#f7edf7}.choice small{display:block;color:#776b7d;font-weight:500;margin-top:6px}
+.btn{background:#35213b;color:#fff;border:none;border-radius:11px;padding:13px 17px;font-weight:850;min-height:46px}.btn.alt{color:#573e62;background:#f4eaf4;border:1px solid #e0d2e1}.btn.light{background:#fff;color:var(--plum);border:1px solid #d9c7de}.actions{display:flex;gap:9px;justify-content:space-between;align-items:center;margin-top:22px}.actions .btn:last-child{margin-left:auto}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.preview{width:100%;height:210px;display:grid;place-items:center;background:#f9f4f8;border:1px dashed #d7c6d5;border-radius:15px;overflow:hidden;color:#8d7389;text-align:center;font-size:13px}.preview img{height:100%;width:100%;object-fit:contain;background:#fff}.tiny{font-size:12px;color:var(--muted);margin:11px 0}
+.found{border-radius:12px;padding:13px;background:#f0e8f4;border:1px solid #d5c6dc;font-size:13px;line-height:1.55;margin:10px 0}.found b{display:block}.summary{display:grid;gap:12px;margin:16px 0}.summary>div{padding:11px 13px;background:#faf6fa;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:9px;justify-content:space-between}.summary b{text-align:right;overflow-wrap:anywhere}
+#success{border:1px solid #bad8ca;background:#f3fbf6;border-radius:16px;padding:24px}.success-title{font-size:23px;font-weight:900;color:#176747}.info{background:#fff4e5;border:1px solid #ecd5af;border-radius:11px;padding:12px;color:#68513c;font-size:12px;line-height:1.5;margin:19px 0}
+dialog{width:min(95vw,480px);border:0;border-radius:15px;padding:20px;color:var(--ink)}dialog::backdrop{background:#1b0c22d1}video{width:100%;max-height:55vh;background:#1d1025;object-fit:cover;border-radius:12px;margin:12px 0}
+@media(max-width:450px){.top{padding:11px}.brand img{width:42px;height:42px}main{padding:17px 11px 48px}.card{padding:17px}.choices{grid-template-columns:1fr}.row{flex-direction:column;align-items:stretch}.row>*{flex:auto}.preview{height:190px}}
+</style>
+</head>
+<body>
+<header><div class="top"><a class="brand" href="../"><img src="../brand-logo.png" alt=""><span>Punto Moda<small>Carga de mercadería</small></span></a><a class="back" href="index.html">Ver planilla</a></div></header>
+<main>
+<span class="kicker">Punto Moda · Gestión simple</span><h1>Agregar un producto</h1><p class="muted">Cinco pasos, desde el celular. Sin planillas complicadas.</p>
+<div class="progress" aria-hidden="true"><span class="bar on"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+<div class="steps"><span id="step-count">Paso 1 de 5</span><span id="step-title">Foto</span></div>
+<div class="card" id="wizard">
+<section data-step="0"><h2>Foto del producto</h2><p>Sacá una foto ahora o elegí una de la galería.</p>
+<div class="preview" id="photo-preview">La foto aparecerá acá</div>
+<div class="row" style="margin-top:16px"><label class="btn alt" style="text-align:center;cursor:pointer">Sacar foto<input type="file" accept="image/*" capture="environment" id="photo-camera" hidden></label><label class="btn light" style="text-align:center;cursor:pointer">Elegir de galería<input type="file" accept="image/*" id="photo-gallery" hidden></label></div>
+<p class="tiny">Podés seguir sin foto y agregarla después. Las fotos quedan guardadas en este navegador, no en la tienda pública.</p>
+</section>
+<section data-step="1" hidden><h2>Código del producto</h2><p>Si trae código de barras, lo leemos. Si no tiene, Punto Moda le asigna uno propio.</p>
+<div class="choices"><button class="choice" id="existing-mode" type="button" aria-pressed="true">Tiene código<small>Escanear o escribir el del envase</small></button><button class="choice" id="generate-mode" type="button" aria-pressed="false">No tiene código<small>Crear uno para una etiqueta</small></button></div>
+<div id="barcode-options"><label class="field">Código de barras<input id="barcode" autocomplete="off" inputmode="text" placeholder="Leé o escribí el número"></label><button type="button" class="btn alt" id="scan">Abrir cámara para escanear</button><p class="tiny">También funciona con lectores de códigos que escriben como un teclado.</p></div>
+<div id="generated-options" hidden><div class="found">Código interno asignado: <b id="generated-code">PM-018</b></div><p class="tiny">Este código se podrá imprimir en una etiqueta y escanear en la caja. No inventamos códigos EAN de fabricantes.</p></div>
+<div class="found" id="exists" hidden></div>
+</section>
+<section data-step="2" hidden><h2>¿Qué producto es?</h2><p>Escribí una descripción corta para identificarlo.</p>
+<label class="field">Descripción *<input id="name" maxlength="160" placeholder="Ej.: Gorra negra estampada"></label>
+<label class="field">Categoría<select id="category"><option>Calzado</option><option>Indumentaria</option><option>Accesorios</option><option>Perfumería</option><option>Juguetes</option><option>Otros</option></select></label>
+<details><summary style="font-size:13px;cursor:pointer;color:var(--plum);font-weight:800">Opcional: talle y color</summary>
+<label class="field">Talle o número<input id="size" maxlength="40" placeholder="Ej.: 38 o M"></label><label class="field">Color<input id="color" maxlength="60" placeholder="Ej.: negro"></label></details>
+</section>
+<section data-step="3" hidden><h2>¿Cuántos tenés?</h2><p>Indicá la cantidad que ingresó. Si el artículo ya existe, la sumamos a su stock actual.</p><label class="field">Cantidad *<input type="number" min="1" max="99999" step="1" value="1" id="quantity"></label></section>
+<section data-step="4" hidden><h2>Precio de venta</h2><p>El último dato antes de guardar el artículo.</p>
+<label class="field">Precio en pesos argentinos *<input id="price" type="number" min="0" step="0.01" placeholder="Ej.: 12500" inputmode="decimal"></label>
+<div class="summary" id="review"></div>
+<p class="tiny">Si el código ya existe, se agregará stock a ese artículo; no se creará una copia.</p>
+</section>
+<div class="actions"><button class="btn alt" id="back" type="button" hidden>Anterior</button><button class="btn" id="next" type="button">Siguiente</button><button class="btn" id="save" type="button" hidden>Guardar producto</button></div>
+<p id="message" role="status" style="color:#a63356;font-size:13px;margin:12px 0 0" hidden></p>
+</div>
+<div id="success" hidden><div class="success-title">✓ Producto guardado</div><p id="result-desc"></p><div class="row"><button id="another" class="btn" type="button">Cargar otro</button><a id="label-link" class="btn alt" style="text-align:center;text-decoration:none" href="caja.html?view=labels">Imprimir etiquetas</a></div><div class="row" style="margin-top:10px"><a href="index.html" class="btn light" style="text-align:center;text-decoration:none">Ver inventario</a><a href="caja.html" class="btn light" style="text-align:center;text-decoration:none">Ir a caja</a></div></div>
+<div class="info">**Demostración local.** Los datos se guardan en este navegador y no se comparten con otros teléfonos ni con la tienda pública. Descargá el respaldo desde <a href="index.html">Inventario</a>. Esta página de GitHub no tiene acceso privado real.</div>
+</main>
+<dialog id="scan-dialog"><h2>Escanear código</h2><p class="muted" id="scan-status">Apuntá al código de barras.</p><video id="scan-video" autoplay muted playsinline></video><button type="button" class="btn alt" id="stop-scan">Cerrar cámara</button></dialog>
+<script>
+(()=>{
+'use strict';
+const KEY='punto-moda-inventario-demo-v1',$=id=>document.getElementById(id);
+const seed=[['PM-001','Medias estampadas Snoopy','Accesorios','Diseño Argentina · celeste y blanco'],['PM-002','Remera deportiva sin mangas','Indumentaria','Negro · deportiva'],['PM-003','Zapatillas Salomon gris y naranja','Calzado','Gris oscuro · naranja'],['PM-004','Zapatillas Salomon gris flúo','Calzado','Gris · amarillo flúo'],['PM-005','Botines estilo T90','Calzado','Turquesa o lima'],['PM-006','Zapatillas Adidas tricolor','Calzado','Blanco · azul · rojo'],['PM-007','Zapatillas Puma azul marino','Calzado','Azul marino · rojo'],['PM-008','Zapatillas Salomon verde oliva','Calzado','Oliva · estilo outdoor'],['PM-009','Zapatillas Adidas celeste','Calzado','Blanco · celeste'],['PM-010','Sandalias con tachas','Calzado','Blanco · plataforma'],['PM-011','Camisa estampada de hojas','Indumentaria','Blanca con estampado negro · manga larga'],['PM-012','Gorra Pato Lucas','Accesorios','Negra y roja · visera estampada'],['PM-013','Gorra Bugs Bunny','Accesorios','Azul y blanca · visera roja estampada'],['PM-014','Gorra Coyote','Accesorios','Negra con estampa · visera multicolor'],['PM-015','Ojotas estampadas surtidas','Calzado','Varios colores y diseños'],['PM-016','Peluches de perritos','Juguetes','Distintos modelos']];
+const initial=()=>({version:1,products:seed.map(x=>({sku:x[0],name:x[1],category:x[2],description:x[3],barcode:'',supplierRef:'',size:'',color:'',cost:null,price:null,qty:0,img:'../images/'+x[0]+'.jpg',createdAt:new Date().toISOString()})).concat([{sku:'PM-PER-017',name:'Club de Nuit Intense Man 35 ml',category:'Perfumería',description:'Perfume de la foto · valor y existencias a confirmar',barcode:'6925564561023',supplierRef:'B100-102',size:'35 ml',color:'',cost:null,price:null,qty:0,img:'',createdAt:new Date().toISOString()}]),movements:[]});
+const read=()=>{try{const obj=JSON.parse(localStorage.getItem(KEY)||'null');return obj&&Array.isArray(obj.products)&&Array.isArray(obj.movements)?obj:initial()}catch{return initial()}};
+let db=read(),step=0,mode='existing',photo=null,stream=null,interval=null,busy=false;
+const fmt=v=>Number(v).toLocaleString('es-AR',{style:'currency',currency:'ARS'});
+const SKU_RE=/^[A-Z0-9-]{3,55}$/;
+function numberNext(){let n=17;for(const p of db.products){const m=String(p.sku).match(/^PM-(?:[A-Z]+-)?(\d+)(?:-|$)/);if(m)n=Math.max(n,+m[1]);}let code;do{n++;code='PM-'+String(n).padStart(3,'0')}while(db.products.some(p=>p.sku===code));return code;}
+let suggested=numberNext();
+function byCode(){const code=mode==='existing'?$('barcode').value.trim():suggested;return code?db.products.find(p=>p.sku.toUpperCase()===code.toUpperCase()||(p.barcode&&p.barcode.toUpperCase()===code.toUpperCase())):null;}
+function showExisting(){
+const p=byCode(),el=$('exists');el.hidden=!p;
+if(p){el.textContent='';const strong=document.createElement('b');strong.textContent='Ya existe: '+p.name;el.append(strong,document.createTextNode('Código '+p.sku+' · Stock actual: '+p.qty+'. La cantidad nueva se sumará.'));$('name').value=p.name;$('category').value=p.category;$('size').value=p.size||'';$('color').value=p.color||'';if(p.price!=null)$('price').value=p.price;}
+}
+function setMode(m){mode=m;$('existing-mode').setAttribute('aria-pressed',String(m==='existing'));$('generate-mode').setAttribute('aria-pressed',String(m==='generated'));$('barcode-options').hidden=m!=='existing';$('generated-options').hidden=m!=='generated';$('generated-code').textContent=suggested;$('exists').hidden=true;if(m==='existing')showExisting();}
+$('existing-mode').onclick=()=>setMode('existing');$('generate-mode').onclick=()=>setMode('generated');$('barcode').addEventListener('input',showExisting);
+function error(msg){$('message').hidden=!msg;$('message').textContent=msg||'';}
+function validate(index){
+if(index===1 && mode==='existing'){const v=$('barcode').value.trim();if(!/^[A-Za-z0-9._-]{3,45}$/.test(v)){error('Escaneá o escribí un código de barras válido; si no tiene, elegí «No tiene código».');return false;}}
+if(index===2&&!$('name').value.trim()){error('Escribí una descripción.');return false;}
+if(index===3){const n=Number($('quantity').value);if(!Number.isInteger(n)||n<1||n>99999){error('La cantidad debe ser un número entero mayor que cero.');return false;}}
+if(index===4){const n=Number($('price').value);if($('price').value.trim()===''||!Number.isFinite(n)||n<0){error('Ingresá un precio válido.');return false;}}
+error('');return true;
+}
+const titles=['Foto','Código','Descripción','Cantidad','Precio'];
+function render(){
+document.querySelectorAll('[data-step]').forEach(s=>s.hidden=Number(s.dataset.step)!==step);
+document.querySelectorAll('.bar').forEach((bar,i)=>bar.classList.toggle('on',i<=step));
+$('step-count').textContent='Paso '+(step+1)+' de 5';$('step-title').textContent=titles[step];
+$('back').hidden=step===0;$('next').hidden=step===4;$('save').hidden=step!==4;
+if(step===4)review();
+window.scrollTo({top:0,behavior:'smooth'});
+}
+$('next').onclick=()=>{if(validate(step)){step=Math.min(4,step+1);render()}};
+$('back').onclick=()=>{error('');step=Math.max(0,step-1);render()};
+function review(){const p=byCode();const items=[['Producto',$('name').value||'—'],['Código',p?.sku||((mode==='generated')?suggested:$('barcode').value.trim())],['Cantidad a sumar',$('quantity').value],['Precio',fmt(Number($('price').value)||0)]];$('review').replaceChildren();for(const [k,v] of items){const row=document.createElement('div');const label=document.createElement('span');label.textContent=k;const bold=document.createElement('b');bold.textContent=v;row.append(label,bold);$('review').append(row);}}
+function reset(){db=read();step=0;mode='existing';photo=null;suggested=numberNext();$('photo-preview').textContent='La foto aparecerá acá';for(const id of ['barcode','name','size','color','price'])$(id).value='';$('quantity').value='1';$('category').value='Calzado';$('photo-camera').value='';$('photo-gallery').value='';setMode('existing');$('wizard').hidden=false;$('success').hidden=true;error('');render();}
+async function attachPhoto(file){if(!file)return;if(!file.type.startsWith('image/')){error('Seleccioná una imagen JPG, PNG o WebP.');return;}if(file.size>15*1024*1024){error('La imagen supera los 15 MB.');return;}
+const src=URL.createObjectURL(file);try{const img=new Image();await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src=src});const factor=Math.min(1,1000/Math.max(img.naturalWidth,img.naturalHeight));const can=document.createElement('canvas');can.width=Math.max(1,Math.round(img.naturalWidth*factor));can.height=Math.max(1,Math.round(img.naturalHeight*factor));const ctx=can.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,can.width,can.height);ctx.drawImage(img,0,0,can.width,can.height);photo=can.toDataURL('image/jpeg',.78);$('photo-preview').replaceChildren();const preview=document.createElement('img');preview.src=photo;preview.alt='Foto seleccionada';$('photo-preview').append(preview);error('');}catch{error('No se pudo cargar la foto. Probá otra.')}finally{URL.revokeObjectURL(src)}}
+$('photo-camera').onchange=e=>attachPhoto(e.target.files[0]);$('photo-gallery').onchange=e=>attachPhoto(e.target.files[0]);
+function save(){
+for(const i of [1,2,3,4])if(!validate(i)){step=i;render();return;}
+const latest=read();db=latest;const found=byCode();const code=mode==='existing'?$('barcode').value.trim():suggested;
+if(!SKU_RE.test(suggested)){error('Código interno inválido.');return;}
+if(mode==='generated' && latest.products.some(p=>p.sku===suggested)){error('El código generado ya existe; volvé a comenzar la carga.');return;}
+const qty=Number($('quantity').value),price=Number($('price').value),name=$('name').value.trim();
+const next=structuredClone(latest);let p;
+if(found){p=next.products.find(x=>x.sku===found.sku);if(!confirm('Este producto ya existe: '+p.name+'. ¿Sumar '+qty+' unidades? No se modificarán otros datos.'))return;p.qty+=qty;}
+else{
+if(mode==='existing'&&next.products.some(x=>x.barcode===code||x.sku===code)){error('Código duplicado. Revisá la carga.');return;}
+p={sku:suggested,name,category:$('category').value,description:'',barcode:mode==='existing'?code:'',supplierRef:'',size:$('size').value.trim(),color:$('color').value.trim(),cost:null,price,qty,img:photo||'',createdAt:new Date().toISOString()};
+next.products.push(p);
+}
+if(qty>0)next.movements.push({id:crypto.randomUUID(),date:new Date().toISOString(),type:'entry',sku:p.sku,name:p.name,qty,unitPrice:p.cost,note:found?'Ingreso guiado sobre artículo existente':'Carga inicial guiada'});
+try{localStorage.setItem(KEY,JSON.stringify(next));}catch{error('No se pudo guardar: el navegador podría estar sin espacio. Descargá un respaldo desde Inventario.');return;}
+db=next;$('wizard').hidden=true;$('success').hidden=false;$('result-desc').textContent=p.name+' · '+p.sku+' · Stock actual: '+p.qty+' unidades.';$('label-link').href='caja.html?view=labels&sku='+encodeURIComponent(p.sku);window.scrollTo({top:0,behavior:'smooth'});
+}
+$('save').onclick=save;$('another').onclick=reset;
+async function stopScan(){if(interval){clearInterval(interval);interval=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('scan-video').srcObject=null;if($('scan-dialog').open)$('scan-dialog').close();}
+$('scan').onclick=async()=>{
+if(!('BarcodeDetector'in window)||!navigator.mediaDevices?.getUserMedia){error('Este navegador no tiene lector automático. Escribí el código del envase o usá un lector externo.');return;}
+try{
+const formats=await BarcodeDetector.getSupportedFormats();const usable=['ean_13','ean_8','upc_a','code_128','code_39'].filter(f=>formats.includes(f));if(!usable.length)throw Error('Formatos de barras no compatibles');
+const detector=new BarcodeDetector({formats:usable});stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});$('scan-video').srcObject=stream;$('scan-dialog').showModal();await $('scan-video').play();
+interval=setInterval(async()=>{if(busy||$('scan-video').readyState<2)return;busy=true;try{const found=await detector.detect($('scan-video'));if(found?.[0]?.rawValue){$('barcode').value=found[0].rawValue;await stopScan();showExisting();error('');}}catch{}finally{busy=false}},380);
+}catch(err){await stopScan();error('No se pudo abrir la cámara. '+(err.message||'Revisá los permisos.'))}
+};
+$('stop-scan').onclick=stopScan;$('scan-dialog').addEventListener('cancel',e=>{e.preventDefault();stopScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden&&stream)stopScan()});
+render();
+})();
+</script></body></html>
