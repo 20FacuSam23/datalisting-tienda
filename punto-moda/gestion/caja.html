@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es-AR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Punto Moda · Caja y etiquetas (demo)</title>
+<meta name="theme-color" content="#321f43">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;--ink:#301f3c;--line:#e8dce9;--muted:#77687f;--accent:#74438d;--bg:#faf8f9;--green:#17684b}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}a{color:var(--accent)}[hidden]{display:none!important}
+header{background:#fff;border-bottom:1px solid var(--line)}.head{max-width:1120px;margin:auto;padding:13px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center}.brand{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:850;text-decoration:none;color:var(--ink)}.brand img{width:47px;height:47px;object-fit:contain}.nav{display:flex;gap:7px;flex-wrap:wrap}.nav a{font-size:12px;font-weight:750;background:#f4edf5;padding:9px 12px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:#583565}
+main{max-width:1120px;padding:25px 18px 70px;margin:auto}h1{font-size:clamp(26px,4vw,40px);letter-spacing:-.04em;margin:8px 0}.subtitle{color:var(--muted);font-size:14px;line-height:1.55}.eyebrow{font-size:11px;letter-spacing:.14em;font-weight:900;color:#9d5e95;text-transform:uppercase}
+.warn{background:#fff4de;border:1px solid #efdbad;padding:13px 15px;border-radius:12px;font-size:12px;line-height:1.5;margin:18px 0}
+.pills{display:flex;gap:7px;margin:18px 0;flex-wrap:wrap}.pill{background:white;border:1px solid #dcd0e2;border-radius:11px;color:#543861;font-size:13px;font-weight:850;padding:12px 17px}.pill[aria-selected=true]{background:#321f43;color:#fff}
+.panel{background:white;border:1px solid var(--line);padding:21px;border-radius:18px;box-shadow:0 12px 34px #24152c0b}.panel h2{margin:0 0 7px;font-size:22px}.panel p{font-size:13px;color:var(--muted);line-height:1.5}
+.row{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:16px 0}.field{display:grid;gap:6px;font-size:12px;font-weight:850;min-width:0}.grow{flex:2}.field input,.field select,.field textarea{width:100%;min-width:0;min-height:42px;border:1px solid #d8cbdd;border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
+.btn{background:#30213b;color:white;border:0;border-radius:10px;padding:11px 15px;font-weight:800;min-height:43px;font-size:13px}.btn.alt{background:#f4eaf8;color:#543461;border:1px solid #dfd1e5}.btn.green{background:var(--green)}.btn.danger{color:#a93658;background:#f9ecf1}
+.tablewrap{overflow:auto;border:1px solid #ece3ed;border-radius:12px}table{border-collapse:collapse;width:100%;min-width:625px;font-size:13px}th{background:#f8f4f8;text-align:left;color:#6b5a74}td,th{padding:12px;border-bottom:1px solid #eee7ed;vertical-align:middle}td small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.qtybuttons{display:flex;align-items:center;gap:8px}.qtybuttons button{border:1px solid #d9cce0;background:white;border-radius:7px;width:31px;height:31px;font-weight:900}
+.summary{display:flex;gap:15px;justify-content:space-between;align-items:center;flex-wrap:wrap;background:#f8f2f9;padding:17px;border-radius:12px;margin:15px 0}.summary strong{font-size:23px}
+.status{margin:10px 0 0;padding:11px;border-radius:10px;background:#f0e9f6;color:#543963;font-size:12px;min-height:36px}
+.foot{font-size:12px;color:var(--muted);line-height:1.5}.split{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.preview{background:#fcfafc;border:1px solid #e8dbe8;border-radius:14px;padding:15px;min-height:220px}.sample{border:1px dashed #aa96aa;padding:15px;background:white;text-align:center;margin:0 auto;max-width:325px}.sample h3{font-size:16px;line-height:1.3;margin:7px 0}.sample p{margin:3px 0;font-size:11px}.barcode{display:block;width:min(100%,330px);height:78px;margin:10px auto 4px}.sample .sku{font-family:monospace;font-size:12px;letter-spacing:.06em}
+dialog{border:0;border-radius:16px;width:min(94vw,510px);padding:20px;color:var(--ink)}dialog::backdrop{background:#1a1027cf}video{display:block;background:#1b1124;width:100%;height:260px;object-fit:cover;border-radius:10px;margin:12px 0}
+#sheet-root{display:none}
+@media(max-width:670px){.head{padding:12px}.nav a{padding:8px 9px}.brand{font-size:17px}.brand img{width:38px;height:38px}main{padding:19px 11px 50px}.panel{padding:15px}.split{grid-template-columns:1fr}.row{align-items:stretch}.row .grow{flex-basis:100%}.summary strong{font-size:19px}}
+@page{size:A4 portrait;margin:0}
+@media print{
+ body>*:not(#sheet-root){display:none!important}#sheet-root{display:block!important;background:white!important;color:black!important}
+ .label-sheet{width:210mm;height:297mm;page-break-after:always;break-after:page;padding:8mm;display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:6mm}
+ .label-sheet:last-child{page-break-after:auto;break-after:auto}
+ .label-print{border:1px solid #bbb;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:5mm;overflow:hidden}
+ .label-print .barcode{height:26mm;width:85mm;max-width:100%;margin:4mm auto 1mm}.label-print .product-name{font-size:15pt;font-weight:900;max-width:100%;overflow-wrap:anywhere}
+ .label-print .product-sku{font-family:monospace;font-size:11pt}.label-print .product-meta{font-size:11pt}.label-print .price{font-size:17pt;font-weight:900}
+}
+</style></head>
+<body>
+<header><div class="head"><a class="brand" href="../"><img src="../brand-logo.png" alt=""><span>Punto Moda · Gestión</span></a><div class="nav"><a href="index.html">Inventario</a><a href="../">Tienda</a></div></div></header>
+<main>
+<span class="eyebrow">Punto Moda · Control de mercadería</span><h1>Caja rápida y etiquetas</h1><p class="subtitle">Escaneá un artículo, sumalo a la venta y confirmá para descontar su stock. También podés imprimir códigos en hojas A4 de cuatro etiquetas.</p>
+<div class="warn"><strong>Modo demostración:</strong> registros guardados solo en este navegador. Esta dirección no tiene autenticación real; no cargues información confidencial. Un pago marcado como confirmado acá se registra <em>manualmente</em>; esta página no cobra ni verifica Mercado Pago.</div>
+<div class="pills" role="tablist"><button class="pill" role="tab" data-view="checkout" aria-selected="true">Caja · Ventas</button><button class="pill" role="tab" data-view="labels" aria-selected="false">Etiquetas · 4 por A4</button><button class="pill" role="tab" data-view="stock" aria-selected="false">Stock y registro</button></div>
+<section class="panel" id="view-checkout"><h2>Venta en mostrador</h2><p>Leé el código con la cámara o escribilo. También acepta un lector USB/Bluetooth que actúe como teclado.</p>
+<div class="row"><label class="field grow">Código de barras o artículo<input id="scan-code" autocomplete="off" placeholder="Ej.: 6925564561023 o PM-003"></label><button class="btn alt" id="camera-open" type="button">Cámara</button><button class="btn" id="add-code" type="button">Agregar</button></div>
+<div class="tablewrap"><table><thead><tr><th>Producto</th><th>Stock actual</th><th>Cant.</th><th>Precio unitario</th><th>Subtotal</th><th></th></tr></thead><tbody id="sale-items"><tr><td colspan="6">Escaneá un producto para comenzar.</td></tr></tbody></table></div>
+<div class="summary"><span>Artículos en la venta: <strong id="sale-units">0</strong></span><span>Total estimado: <strong id="sale-total">$ 0</strong></span></div>
+<div class="row"><label class="field grow">Medio de pago (registro)<select id="payment"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Mercado Pago (confirmado externamente)">Mercado Pago (confirmado por fuera)</option><option value="Otro">Otro</option></select></label><label class="field grow">Observación / comprobante<input id="sale-note" maxlength="150" placeholder="N.º de comprobante o comentario"></label></div>
+<div class="row"><button class="btn green" id="confirm-sale">Confirmar venta y descontar stock</button><button class="btn alt" id="clear-sale">Vaciar selección</button></div>
+<p class="status" id="sale-message" role="status">El stock solo se descuenta después de confirmar la venta.</p>
+</section>
+<section class="panel" id="view-labels" hidden><h2>Etiquetas de productos</h2><p>Una hoja tamaño A4 con cuatro etiquetas (dos columnas por dos filas). Podés repetir una misma etiqueta o imprimir varias páginas.</p>
+<div class="split"><div><label class="field">Producto<select id="label-product"></select></label><div class="row"><label class="field grow">Cantidad de etiquetas<input type="number" id="label-count" min="1" max="80" value="4"></label><button id="print-labels" class="btn">Preparar e imprimir</button></div><p class="foot">Las etiquetas llevan el código interno escaneable en <strong>Code 39</strong>, y muestran la referencia de barras del fabricante si existe. Configurá papel A4, escala 100 % y desactivá encabezados/pies de impresión. Confirmá las medidas del papel adhesivo antes de imprimir.</p></div><div id="label-preview" class="preview"></div></div>
+</section>
+<section class="panel" id="view-stock" hidden><h2>Seguimiento y registro</h2><p>Los movimientos de caja se incorporan al mismo historial de la planilla del panel de inventario.</p><div class="row"><label class="field grow">Buscar código o descripción<input id="history-query" type="search" placeholder="Buscar"></label><button class="btn alt" id="refresh">Actualizar</button><button class="btn alt" id="download-backup">Respaldo JSON</button></div><div class="tablewrap"><table><thead><tr><th>Artículo</th><th>Código de barras</th><th>Variante</th><th>Unidades</th><th>Venta</th></tr></thead><tbody id="stock-rows"></tbody></table></div>
+<h2 style="margin-top:28px">Últimos movimientos</h2><div class="tablewrap"><table><thead><tr><th>Fecha</th><th>Operación</th><th>Producto</th><th>Cantidad</th><th>Importe</th><th>Nota</th></tr></thead><tbody id="history-rows"></tbody></table></div></section>
+</main>
+<div id="sheet-root" aria-hidden="true"></div>
+<dialog id="camera-dialog"><h2>Escanear código de barras</h2><p id="camera-status">Apuntá la cámara al código.</p><video id="camera-video" autoplay playsinline muted></video><button class="btn alt" id="camera-close">Cerrar cámara</button></dialog>
+<script>
+(()=>{
+'use strict';
+const KEY='punto-moda-inventario-demo-v1';
+const $=id=>document.getElementById(id);
+const lineItems=new Map();
+const money=v=>v==null?'A consultar':new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:2}).format(v);
+const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const numeric=x=>Number.isFinite(Number(x))&&x!==null?Number(x):null;
+const read=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return x&&Array.isArray(x.products)&&Array.isArray(x.movements)?x:null;}catch{return null}};
+const dbOrWarn=()=>{const db=read();if(!db){$('sale-message').textContent='Primero abrí Inventario para inicializar la planilla local.';}return db;};
+const find=(db,code)=>db.products.find(p=>String(p.sku).trim().toUpperCase()===code.toUpperCase()||(p.barcode&&String(p.barcode).trim()===code));
+function showView(name){for(const id of ['checkout','labels','stock'])$('view-'+id).hidden=id!==name;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.view===name)));if(name==='labels')refreshLabels();if(name==='stock')renderHistory();}
+document.querySelectorAll('[data-view]').forEach(x=>x.addEventListener('click',()=>showView(x.dataset.view)));
+function addCode(){const db=dbOrWarn();if(!db)return;const value=$('scan-code').value.trim();if(!value)return;const p=find(db,value);if(!p){$('sale-message').textContent='Código no encontrado: '+value+'. Cargalo primero en Inventario → Artículo.';return;}
+const count=lineItems.get(p.sku)||0;if(count+1>p.qty){$('sale-message').textContent='No hay stock suficiente de '+p.name+' (hay '+p.qty+').';return;}lineItems.set(p.sku,count+1);$('scan-code').value='';$('scan-code').focus();$('sale-message').textContent='Agregado: '+p.name;drawCart();}
+function drawCart(){const db=read();const root=$('sale-items');root.replaceChildren();let total=0,units=0;
+for(const [sku,qty] of lineItems){const p=db?.products.find(x=>x.sku===sku);if(!p)continue;units+=qty;if(p.price!=null)total+=Number(p.price)*qty;
+const tr=document.createElement('tr');
+tr.innerHTML='<td><b>'+esc(p.name)+'</b><small>'+esc(sku)+' · '+esc([p.size,p.color].filter(Boolean).join(' / '))+'</small></td><td>'+p.qty+'</td><td><span class="qtybuttons"><button data-action="minus" data-sku="'+esc(sku)+'">−</button><b>'+qty+'</b><button data-action="plus" data-sku="'+esc(sku)+'">+</button></span></td><td>'+money(p.price)+'</td><td>'+money(p.price==null?null:p.price*qty)+'</td><td><button class="btn danger" data-action="remove" data-sku="'+esc(sku)+'">Quitar</button></td>';root.append(tr);}
+if(!units)root.innerHTML='<tr><td colspan="6">Escaneá un producto para comenzar.</td></tr>';
+$('sale-units').textContent=units;$('sale-total').textContent=money(total);$('confirm-sale').disabled=!units;}
+$('sale-items').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const sku=b.dataset.sku;const db=read(),p=db?.products.find(x=>x.sku===sku);if(!p)return;const current=lineItems.get(sku)||0;
+if(b.dataset.action==='remove'||b.dataset.action==='minus'&&current===1)lineItems.delete(sku);
+else if(b.dataset.action==='minus')lineItems.set(sku,current-1);
+else if(b.dataset.action==='plus'){if(current>=p.qty){$('sale-message').textContent='No hay más stock disponible.';return;}lineItems.set(sku,current+1);}
+drawCart();});
+$('add-code').addEventListener('click',addCode);$('scan-code').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCode()}});
+$('clear-sale').addEventListener('click',()=>{lineItems.clear();drawCart();$('sale-message').textContent='Venta vaciada.'});
+$('confirm-sale').addEventListener('click',()=>{
+const db=dbOrWarn();if(!db||!lineItems.size)return;
+for(const [sku,qty] of lineItems){const p=db.products.find(x=>x.sku===sku);if(!p||p.qty<qty){$('sale-message').textContent='No se registró: stock insuficiente o artículo inexistente ('+sku+').';return;}
+if(p.price==null||!Number.isFinite(Number(p.price))){$('sale-message').textContent='Antes de vender asigná un precio de venta al artículo '+sku+'.';return;}}
+const total=[...lineItems].reduce((sum,[sku,qty])=>sum+Number(db.products.find(p=>p.sku===sku).price)*qty,0);
+if(!confirm('¿Confirmar venta por '+money(total)+' y descontar '+[...lineItems.values()].reduce((a,b)=>a+b,0)+' unidades del stock local?'))return;
+const batch='PMV-'+Date.now().toString(36).toUpperCase();const date=new Date().toISOString(),payment=$('payment').value,comment=$('sale-note').value.trim();
+const next=structuredClone(db);
+for(const [sku,qty] of lineItems){const p=next.products.find(x=>x.sku===sku);p.qty-=qty;next.movements.push({id:crypto.randomUUID(),batchId:batch,date,type:'sale',sku:p.sku,name:p.name,qty,unitPrice:Number(p.price),payment,note:batch+' · '+payment+(comment?' · '+comment:'')})}
+try{localStorage.setItem(KEY,JSON.stringify(next));}catch{$('sale-message').textContent='No se pudo guardar. Descargá respaldo desde Inventario.';return;}
+lineItems.clear();$('sale-note').value='';drawCart();refreshLabels();$('sale-message').textContent='Venta '+batch+' registrada. Total '+money(total)+'. Se descontó stock en este navegador.';});
+const CODE39={
+'0':'nnnwwnwnn','1':'wnnwnnnnw','2':'nnwwnnnnw','3':'wnwwnnnnn','4':'nnnwwnnnw','5':'wnnwwnnnn','6':'nnwwwnnnn','7':'nnnwnnwnw','8':'wnnwnnwnn','9':'nnwwnnwnn',
+'A':'wnnnnwnnw','B':'nnwnnwnnw','C':'wnwnnwnnn','D':'nnnnwwnnw','E':'wnnnwwnnn','F':'nnwnwwnnn','G':'nnnnnwwnw','H':'wnnnnwwnn','I':'nnwnnwwnn','J':'nnnnwwwnn',
+'K':'wnnnnnnww','L':'nnwnnnnww','M':'wnwnnnnwn','N':'nnnnwnnww','O':'wnnnwnnwn','P':'nnwnwnnwn','Q':'nnnnnnwww','R':'wnnnnnwwn','S':'nnwnnnwwn','T':'nnnnwnwwn',
+'U':'wwnnnnnnw','V':'nwwnnnnnw','W':'wwwnnnnnn','X':'nwnnwnnnw','Y':'wwnnwnnnn','Z':'nwwnwnnnn','-':'nwnnnnwnw','.':'wwnnnnwnn',' ':'nwwnnnwnn','$':'nwnwnwnnn','/':'nwnwnnnwn','+':'nwnnnwnwn','%':'nnnwnwnwn','*':'nwnnwnwnn'
+};
+function barcodeSvg(value){const code='*'+String(value).toUpperCase()+'*';if(![...code].every(x=>CODE39[x]))return '<span>Imprimir código: '+esc(value)+'</span>';
+let x=10,bars='';for(const c of code){const p=CODE39[c];for(let i=0;i<9;i++){const w=p[i]==='w'?5:2;if(i%2===0)bars+='<rect x="'+x+'" y="4" width="'+w+'" height="66"/>';x+=w;}x+=3;}
+return '<svg class="barcode" viewBox="0 0 '+(x+10)+' 75" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Código de barras '+esc(value)+'"><g fill="#111">'+bars+'</g></svg>';}
+function labelHtml(p,cls){return '<div class="'+cls+'"><div style="font-size:10pt;letter-spacing:.08em;font-weight:900">PUNTO MODA</div><div class="product-name">'+esc(p.name)+'</div><div class="product-meta">'+esc([p.size,p.color].filter(Boolean).join(' · ')||p.category)+'</div>'+barcodeSvg(p.sku)+'<div class="product-sku">'+esc(p.sku)+'</div>'+(p.barcode?'<div class="product-meta">EAN/ref.: '+esc(p.barcode)+'</div>':'')+'<div class="price">'+(p.price==null?'Precio a consultar':money(p.price))+'</div></div>';}
+function refreshLabels(){const db=dbOrWarn();if(!db)return;const select=$('label-product');const previous=select.value;select.replaceChildren();
+for(const p of db.products){const opt=document.createElement('option');opt.value=p.sku;opt.textContent=p.sku+' — '+p.name;select.append(opt)}
+if(db.products.some(x=>x.sku===previous))select.value=previous;drawLabelPreview();}
+function drawLabelPreview(){const db=read(),p=db?.products.find(x=>x.sku===$('label-product').value);$('label-preview').innerHTML=p?labelHtml(p,'sample'):'Seleccioná un producto.';}
+$('label-product').addEventListener('change',drawLabelPreview);
+$('print-labels').addEventListener('click',()=>{const db=read(),p=db?.products.find(x=>x.sku===$('label-product').value),n=Number($('label-count').value);if(!p||!Number.isInteger(n)||n<1||n>80){alert('Seleccioná un producto y una cantidad de 1 a 80.');return;}
+const pages=Math.ceil(n/4);let html='';for(let j=0;j<pages;j++){html+='<section class="label-sheet">';for(let i=0;i<4;i++){html+=(j*4+i<n)?labelHtml(p,'label-print'):'<div></div>'}html+='</section>'}
+$('sheet-root').innerHTML=html;window.print();});
+function renderHistory(){const db=dbOrWarn();if(!db)return;const query=$('history-query').value.trim().toLowerCase();
+const prods=db.products.filter(p=>[p.name,p.sku,p.barcode,p.color,p.size].join(' ').toLowerCase().includes(query));
+$('stock-rows').innerHTML=prods.map(p=>'<tr><td><b>'+esc(p.name)+'</b><small>'+esc(p.sku)+'</small></td><td>'+esc(p.barcode||'—')+'</td><td>'+esc([p.size,p.color].filter(Boolean).join(' · ')||'—')+'</td><td><b>'+p.qty+'</b></td><td>'+money(p.price)+'</td></tr>').join('')||'<tr><td colspan="5">Sin artículos.</td></tr>';
+$('history-rows').innerHTML=db.movements.filter(m=>[m.name,m.sku,m.note].join(' ').toLowerCase().includes(query)).slice(-80).reverse().map(m=>'<tr><td>'+new Date(m.date).toLocaleString('es-AR')+'</td><td>'+esc(m.type)+'</td><td>'+esc(m.name)+'</td><td>'+esc(m.qty)+'</td><td>'+money(m.unitPrice==null?null:m.unitPrice*m.qty)+'</td><td>'+esc(m.note||'')+'</td></tr>').join('')||'<tr><td colspan="6">Sin movimientos.</td></tr>';}
+$('history-query').addEventListener('input',renderHistory);$('refresh').addEventListener('click',()=>{renderHistory();drawCart()});
+$('download-backup').addEventListener('click',()=>{const db=read();if(!db)return;const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Punto_Moda_respaldo_caja_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)});
+let stream=null,interval=null,busy=false;
+async function closeCamera(){if(interval){clearInterval(interval);interval=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('camera-video').srcObject=null;if($('camera-dialog').open)$('camera-dialog').close();}
+$('camera-open').addEventListener('click',async()=>{if(!('BarcodeDetector' in window)||!navigator.mediaDevices?.getUserMedia){$('sale-message').textContent='La lectura automática no está disponible en este navegador. Escribí el código o usá lector tipo teclado.';return;}
+try{const formats=await BarcodeDetector.getSupportedFormats();const usable=['ean_13','ean_8','upc_a','code_128','code_39','qr_code'].filter(x=>formats.includes(x));
+if(!usable.length)throw Error('No hay formatos compatibles');const detector=new BarcodeDetector({formats:usable});stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+$('camera-video').srcObject=stream;$('camera-dialog').showModal();await $('camera-video').play();interval=setInterval(async()=>{if(busy||$('camera-video').readyState<2)return;busy=true;try{const found=await detector.detect($('camera-video'));if(found?.[0]?.rawValue){$('scan-code').value=found[0].rawValue;await closeCamera();addCode();}}catch{}finally{busy=false;}},350);
+}catch(err){await closeCamera();$('sale-message').textContent='No se pudo usar la cámara: '+(err.message||'permiso denegado');}});
+$('camera-close').addEventListener('click',closeCamera);$('camera-dialog').addEventListener('cancel',e=>{e.preventDefault();closeCamera()});document.addEventListener('visibilitychange',()=>{if(document.hidden&&stream)closeCamera()});
+window.addEventListener('storage',e=>{if(e.key===KEY){drawCart();if(!$('view-stock').hidden)renderHistory();if(!$('view-labels').hidden)refreshLabels();}});
+drawCart();refreshLabels();renderHistory();
+})();
+</script></body></html>
