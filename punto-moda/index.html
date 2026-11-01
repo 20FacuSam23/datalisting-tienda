@@ -55,8 +55,40 @@
   .brand-stamp--hero{width:175px}
 }
 
+
+/* Identidad de Punto Moda y ajustes de pantallas pequeñas */
+html,body{width:100%;max-width:100%;overflow-x:clip}
+.logo-with-original{display:inline-flex;align-items:center;gap:9px;min-width:0;flex-shrink:0}
+.logo-with-original .pm-brand-text{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:0;line-height:.97;color:#A56898;font-size:clamp(17px,3.8vw,25px);font-weight:850;letter-spacing:-.7px;white-space:nowrap}
+.logo-with-original .pm-brand-text span{display:block;color:#A56898}
+.pm-mark-float{width:66px;height:64px;flex-shrink:0}
+.head{width:100%;min-width:0}
+.head-actions{min-width:0;flex-shrink:0}
+.banner,.banner-layout,.banner-copy{width:100%;max-width:100%;min-width:0}
+.banner h1{font-size:clamp(32px,8.2vw,62px);letter-spacing:-.045em;line-height:1.12;max-width:100%;overflow-wrap:break-word}
+.banner p{font-size:clamp(15px,4vw,18px);overflow-wrap:break-word}
+.banner .kicker{display:block;font-size:clamp(10px,2.7vw,12px);letter-spacing:.12em;overflow-wrap:break-word}
+@media(max-width:680px){
+ .wrap{width:100%;max-width:100%;padding-inline:17px}
+ .head{padding:10px 0;gap:8px}
+ .pm-mark-float{width:57px;height:55px}
+ .logo-with-original .pm-brand-text{font-size:21px}
+ .head-actions{gap:6px}
+ .head-actions .button{padding:9px 10px;font-size:12px;white-space:nowrap}
+ .head-actions .ig-head{padding:8px}
+ .banner{padding:31px 0}
+ .banner h1{font-size:clamp(32px,9.4vw,45px);letter-spacing:-.045em}
+ .banner p{font-size:16px;line-height:1.5}
+ .banner .link{max-width:100%;text-align:center}
+}
+@media(max-width:365px){
+ .pm-mark-float{width:48px;height:49px}
+ .logo-with-original .pm-brand-text{font-size:17px}
+ .head-actions .button{font-size:11px;padding:8px}
+}
+
 </style></head>
-<body><header><div class="wrap head"><a class="logo logo-with-original" href="#inicio" aria-label="Punto Moda, inicio"><img class="pm-mark-float" src="brand-mark.svg" alt="" width="73" height="64"></a><div class="head-actions"><a class="ig-head" href="https://www.instagram.com/punto.modaparana/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Punto Moda"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.6" cy="6.6" r=".9" fill="currentColor" stroke="none"></circle></svg><span>Instagram</span></a><button class="button" id="open">Mi pedido <b class="pill" id="num">0</b></button></div></div></header>
+<body><header><div class="wrap head"><a class="logo logo-with-original" href="#inicio" aria-label="Punto Moda, inicio"><img class="pm-mark-float" src="brand-mark.svg?v=20261101-2" alt="" width="73" height="64"><span class="pm-brand-text"><span>Punto</span><span>Moda</span></span></a><div class="head-actions"><a class="ig-head" href="https://www.instagram.com/punto.modaparana/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Punto Moda"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.6" cy="6.6" r=".9" fill="currentColor" stroke="none"></circle></svg><span>Instagram</span></a><button class="button" id="open">Mi pedido <b class="pill" id="num">0</b></button></div></div></header>
 <section class="banner" id="inicio"><div class="wrap banner-layout"><div class="banner-copy"><span class="kicker">Indumentaria · Calzado · Accesorios</span><h1>Encontrá tu próximo favorito.</h1><p>Explorá los productos de Punto Moda, elegí tus favoritos y consultanos precios, talles y disponibilidad por WhatsApp.</p><a href="#catalogo" class="link">Explorar productos</a><a class="ig-hero" href="https://www.instagram.com/punto.modaparana/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.6" cy="6.6" r=".9" fill="currentColor" stroke="none"></circle></svg> Seguinos en Instagram</a></div></div></section>
 <main><section id="catalogo"><span class="kicker">Nuestra selección</span><h2>Catálogo Punto Moda</h2><p class="subtitle">Productos fotografiados en el local. Consultá precio, talle y disponibilidad.</p>
 <div class="tools"><div class="cats" id="cats"><button class="chip on" data-cat="Todos">Todos</button><button class="chip" data-cat="Calzado">Calzado</button><button class="chip" data-cat="Indumentaria">Indumentaria</button><button class="chip" data-cat="Accesorios">Accesorios</button><button class="chip" data-cat="Juguetes">Juguetes</button></div><input id="find" type="search" placeholder="Buscar productos..." aria-label="Buscar"></div>
