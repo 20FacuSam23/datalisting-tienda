@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 82" fill="none" role="img" aria-label="Símbolo de Punto Moda">
+  <g stroke="#A56898" stroke-width="4" stroke-linecap="round">
+    <path d="M15 25 28 30M12 41h14M15 57l13-5M85 25 72 30M88 41H74M85 57l-13-5"/>
+  </g>
+  <path d="M50 8c-13.3 0-23.5 10.3-23.5 23.2 0 17.7 23.5 41.2 23.5-23.5C73.5 48.9 73.5 31.2 73.5 31.2 73.5 18.3 63.3 8 50 8Z" fill="#A56898"/>
+  <circle cx="50" cy="31.4" r="8.2" fill="white"/>
+</svg>
