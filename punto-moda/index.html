@@ -106,7 +106,20 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 }
 .pm-dev-band--one{top:32%;transform:rotate(-14deg)}
 .pm-dev-band--two{top:56%;transform:rotate(13deg)}
-.pm-dev-band span{display:block;min-width:max-content}
+.pm-dev-band .pm-dev-track{
+  display:flex;align-items:center;width:max-content;flex:0 0 auto;
+  white-space:nowrap;will-change:transform;
+}
+.pm-dev-band .pm-dev-copy{display:block;flex:0 0 auto;white-space:nowrap}
+.pm-dev-band--one .pm-dev-track{animation:pmDevTextLeft 34s linear infinite}
+.pm-dev-band--two .pm-dev-track{animation:pmDevTextLeft 34s linear infinite reverse}
+@keyframes pmDevTextLeft{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+@media(prefers-reduced-motion:reduce){
+  .pm-dev-band .pm-dev-track{animation:none;will-change:auto}
+}
 .pm-dev-notice{
   position:absolute;bottom:clamp(18px,6vh,65px);left:16px;right:16px;
   margin:auto;max-width:500px;text-align:center;
@@ -127,8 +140,8 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 </style></head>
 <body>
 <a class="pm-dev-cover" href="https://20facusam23.github.io/portfolio/" aria-label="By Datalisting, en desarrollo. Ver portfolio del desarrollador">
-  <span class="pm-dev-band pm-dev-band--one" aria-hidden="true"><span>BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO</span></span>
-  <span class="pm-dev-band pm-dev-band--two" aria-hidden="true"><span>BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO</span></span>
+  <span class="pm-dev-band pm-dev-band--one" aria-hidden="true"><span class="pm-dev-track"><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span></span></span>
+  <span class="pm-dev-band pm-dev-band--two" aria-hidden="true"><span class="pm-dev-track"><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span></span></span>
   <span class="pm-dev-notice">Maqueta de muestra · Proyecto pendiente de confirmación<strong>Ver portfolio de Datalisting ↗</strong></span>
 </a>
 <header><div class="wrap head"><a class="logo logo-with-original" href="#inicio" aria-label="Punto Moda, inicio"><img class="pm-mark-float" src="brand-mark.svg?v=20261101-2" alt="" width="73" height="64"><span class="pm-brand-text"><span>Punto</span><span>Moda</span></span></a><div class="head-actions"><a class="ig-head" href="https://www.instagram.com/punto.modaparana/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Punto Moda"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.6" cy="6.6" r=".9" fill="currentColor" stroke="none"></circle></svg><span>Instagram</span></a><button class="button" id="open">Mi pedido <b class="pill" id="num">0</b></button></div></div></header>
