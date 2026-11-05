@@ -173,13 +173,47 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  .card .picture img{transition:none}
 }
 
+
+/* Acceso a la demostración: conservamos las fajas pero no bloqueamos la vista. */
+.pm-dev-cover{cursor:default}
+.pm-dev-notice{max-width:540px}
+.pm-dev-actions{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:15px;position:relative;z-index:2}
+.pm-dev-enter,.pm-dev-portfolio{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:48px;border-radius:11px;padding:12px 19px;font-size:14px;font-weight:850;cursor:pointer}
+.pm-dev-enter{background:#e9c7fa;color:#241331;border:1px solid #f1d7fc}
+.pm-dev-portfolio{background:#241b32;color:#fff;border:1px solid #ae8ab9}
+.pm-dev-enter:hover,.pm-dev-enter:focus-visible{background:white}
+.pm-dev-portfolio:hover,.pm-dev-portfolio:focus-visible{background:#503b60}
+.pm-dev-cover[hidden]{display:none!important}
+@media(max-width:420px){.pm-dev-notice{bottom:17px;padding:13px 12px}.pm-dev-enter,.pm-dev-portfolio{font-size:13px;flex:1;padding:11px 10px;white-space:nowrap}}
 </style></head>
 <body>
-<a class="pm-dev-cover" href="https://20facusam23.github.io/portfolio/" aria-label="By Datalisting, en desarrollo. Ver portfolio del desarrollador">
+<div class="pm-dev-cover" id="pmDevCover" role="dialog" aria-modal="true" aria-label="Vista preliminar de Punto Moda en desarrollo">
   <span class="pm-dev-band pm-dev-band--one" aria-hidden="true"><span class="pm-dev-track"><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span></span></span>
   <span class="pm-dev-band pm-dev-band--two" aria-hidden="true"><span class="pm-dev-track"><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span><span class="pm-dev-copy">BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; BY DATALISTING &nbsp;·&nbsp; EN DESARROLLO &nbsp;·&nbsp; </span></span></span>
-  <span class="pm-dev-notice">Maqueta de muestra · Proyecto pendiente de confirmación<strong>Ver portfolio de Datalisting ↗</strong></span>
-</a>
+  <div class="pm-dev-notice">
+  <span>Maqueta de muestra · Proyecto pendiente de confirmación</span>
+  <strong>By Datalisting · En desarrollo</strong>
+  <div class="pm-dev-actions">
+    <button type="button" id="pmViewProject" class="pm-dev-enter">Ver proyecto</button>
+    <a href="https://20facusam23.github.io/portfolio/" class="pm-dev-portfolio">Ver portfolio</a>
+  </div>
+</div>
+</div>
+<script>
+(()=>{
+ const cover=document.getElementById('pmDevCover');
+ const button=document.getElementById('pmViewProject');
+ const key='punto-moda-vista-demo';
+ function enter(){
+  cover.hidden=true;
+  try{sessionStorage.setItem(key,'1')}catch{}
+ }
+ button.addEventListener('click',enter);
+ let previouslyOpened=false;
+ try{previouslyOpened=sessionStorage.getItem(key)==='1'}catch{}
+ if(previouslyOpened || new URLSearchParams(window.location.search).get('vista')==='demo')enter();
+})();
+</script>
 <header><div class="wrap head"><a class="logo logo-with-original" href="#inicio" aria-label="Punto Moda, inicio"><img class="pm-mark-float" src="brand-mark.svg?v=20261101-2" alt="" width="73" height="64"><span class="pm-brand-text"><span>Punto</span><span>Moda</span></span></a><div class="head-actions"><a class="ig-head" href="https://www.instagram.com/punto.modaparana/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Punto Moda"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.6" cy="6.6" r=".9" fill="currentColor" stroke="none"></circle></svg><span>Instagram</span></a><button class="button" id="open">Mi pedido <b class="pill" id="num">0</b></button></div></div></header>
 <section class="banner" id="inicio"><div class="wrap banner-layout"><div class="banner-copy"><span class="kicker">Indumentaria · Calzado · Accesorios</span><h1>Encontrá tu próximo favorito.</h1><p>Explorá los productos de Punto Moda, elegí tus favoritos y consultanos precios, talles y disponibilidad por WhatsApp.</p><a href="#catalogo" class="link">Explorar productos</a><a class="ig-hero" href="https://www.instagram.com/punto.modaparana/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.6" cy="6.6" r=".9" fill="currentColor" stroke="none"></circle></svg> Seguinos en Instagram</a></div></div></section>
 <main><section id="catalogo"><span class="kicker">Nuestra selección</span><h2>Catálogo Punto Moda</h2><p class="subtitle">Productos fotografiados en el local. Consultá precio, talle y disponibilidad.</p>
