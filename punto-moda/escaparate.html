@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#100d15">
+<meta name="description" content="Vista previa cinematográfica de prendas en Punto Moda. Una demostración local de la tienda en desarrollo.">
+<title>Punto Moda | Escaparate animado · By Datalisting</title>
+<style>
+:root{color-scheme:dark;--background:#100d15;--ink:#f7f0f7;--soft:#cdbdcc;--accent:#c9a0e8;--line:#ffffff24}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--background);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+a{color:inherit}button,input{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #d8b0f1;outline-offset:4px}
+[hidden]{display:none!important}
+.topbar{height:77px;position:relative;z-index:5;background:#100d15e6;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1360px;height:100%;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 clamp(15px,4vw,48px)}
+.brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;min-width:0}
+.brand img{width:52px;height:54px;object-fit:contain;filter:drop-shadow(0 2px 4px #0005);animation:logoFloat 3s ease-in-out infinite}
+.brand-name{font-weight:850;letter-spacing:-.045em;color:#d7a8cc;font-size:19px;line-height:1.02}
+.brand-name span{display:block}
+.brand-small{display:block;font-size:9px;color:#c2a6c2;letter-spacing:.16em;text-transform:uppercase;margin-top:5px;white-space:nowrap}
+.top-actions{display:flex;align-items:center;gap:10px}
+.link-quiet{text-decoration:none;font-size:12px;color:#d8ccdb}
+.btn{border:1px solid #d1b3d3;border-radius:999px;background:#e6c5f2;color:#231727;padding:12px 17px;font-weight:850;font-size:12px;white-space:nowrap}
+.btn:hover{background:white}
+.btn.outline{background:#17121d;color:#f8e6f4;border-color:#ffffff40}
+.stage{isolation:isolate;position:relative;display:flex;align-items:center;min-height:min(840px,calc(100svh - 77px));overflow:hidden;background:#08070c}
+.stage::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 74% 48%,#7a54704e 0%,transparent 48%),radial-gradient(ellipse at 15% 88%,#35223e9a,transparent 57%);z-index:-1;pointer-events:none}
+.stage-lines{position:absolute;inset:0;opacity:.15;z-index:-1;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),#e0c5f4 calc(25% - 1px),#e0c5f4 25%);mask-image:linear-gradient(180deg,transparent,#000,transparent)}
+.stage-inner{position:relative;width:100%;max-width:1360px;margin:auto;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);align-items:center;gap:clamp(8px,4vw,50px);padding:50px clamp(20px,6vw,85px) 85px}
+.copy{position:relative;z-index:2;min-width:0}
+.eyebrow{display:block;font-size:11px;color:var(--accent);font-weight:900;letter-spacing:.22em;text-transform:uppercase}
+.copy h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(45px,6vw,91px);font-weight:400;letter-spacing:-.065em;line-height:.98;margin:20px 0 22px;max-width:690px;text-wrap:balance;overflow-wrap:anywhere}
+.copy h1 em{font-weight:400;color:#e5bde7}
+.copy p{font-size:clamp(14px,1.45vw,18px);line-height:1.7;color:#d8ccd8;max-width:425px}
+.meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:29px 0 0;color:#e4d2e4;font-size:12px}
+.meta .dot{width:4px;height:4px;border-radius:50%;background:#d3a5d3}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin:29px 0}
+.hero-link{display:inline-flex;text-decoration:none;align-items:center;justify-content:center;min-height:46px;border-radius:10px;padding:13px 20px;background:#dab7ec;color:#211629;font-size:13px;font-weight:850;border:0}
+.hero-link.secondary{background:transparent;border:1px solid #ffffff50;color:white}
+.preview-note{color:#ae9eaf;font-size:11px;line-height:1.5;max-width:470px}
+.visual{height:clamp(450px,66vw,710px);position:relative;display:grid;place-items:center;min-width:0;overflow:visible;isolation:isolate}
+.visual::before{content:"";width:87%;height:82%;border-radius:50%;background:radial-gradient(ellipse,#ad7aa25e 0%,#482e4930 39%,transparent 70%);filter:blur(23px);position:absolute;z-index:-2}
+.visual::after{content:"";position:absolute;left:10%;right:8%;bottom:7%;height:8%;border-radius:50%;background:#000c;filter:blur(35px);z-index:-1}
+.photo-frame{position:relative;width:100%;height:100%;display:grid;place-items:center;transition:opacity .4s ease,transform .65s cubic-bezier(.2,.8,.1,1);will-change:transform}
+.photo-frame.entering{opacity:0;transform:translateY(30px) scale(.92)}
+.product-halo{position:absolute;width:min(74%,500px);height:80%;border:1px solid #ffffff19;border-radius:50%;transform:rotate(-19deg)}
+.product-halo.second{width:min(59%,400px);height:92%;transform:rotate(19deg);opacity:.5}
+.product-photo{display:block;width:100%;height:91%;object-fit:contain;filter:drop-shadow(0 24px 45px #000b);animation:galleryFloat 6s ease-in-out infinite}
+.product-photo.no-photo{opacity:.65}
+.corner{position:absolute;bottom:4%;right:-1%;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#ccafcb;writing-mode:vertical-rl}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.19em;text-transform:uppercase;color:#c1adbf;white-space:nowrap;display:flex;gap:10px;align-items:center}
+.scroll-hint:before{content:"";display:block;width:35px;height:1px;background:#c6a6cb}
+.section{max-width:1360px;margin:auto;padding:95px clamp(20px,6vw,85px)}
+.section-title{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:35px}
+.section-title h2{font:400 clamp(35px,5vw,66px)/1.04 Georgia,"Times New Roman",serif;letter-spacing:-.035em;margin:11px 0}
+.section-title p{max-width:355px;color:#bcafc1;line-height:1.65;font-size:13px}
+.collection{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.look{position:relative;overflow:hidden;border:1px solid #ffffff20;background:linear-gradient(160deg,#211825,#16131a);border-radius:16px;min-height:390px;padding:18px;text-align:left;color:white}
+.look.current{border-color:#dfb8e7;box-shadow:0 0 0 1px #9d719d70 inset}
+.look:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 55% 42%,#724f673d,transparent 60%);pointer-events:none}
+.look img{display:block;position:relative;width:100%;height:300px;object-fit:contain;filter:drop-shadow(0 15px 20px #0008);transition:transform .5s}
+.look:hover img,.look:focus-visible img{transform:scale(1.045) translateY(-5px)}
+.look .look-name{display:block;position:relative;font-size:16px;font-weight:700;margin:8px 0 4px}
+.look .look-detail{font-size:11px;color:#d2bcd0}
+.story{border-top:1px solid #ffffff19;background:linear-gradient(180deg,#141019,#100d15)}
+.story-inner{max-width:1200px;margin:auto;min-height:440px;padding:110px 26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:55px}
+.story h2{font:400 clamp(42px,5vw,70px)/1.05 Georgia,"Times New Roman",serif;letter-spacing:-.04em;margin:14px 0}
+.story p{line-height:1.8;font-size:15px;color:#cdbecd}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.details div{border-top:1px solid #ffffff36;padding:16px 0}
+.details b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.17em;color:#c99bc9;margin-bottom:7px}
+.details span{display:block;color:#eee4ef;font-size:13px;overflow-wrap:anywhere}
+.foot{border-top:1px solid #ffffff20;text-align:center;padding:35px 15px;color:#a99aac;font-size:12px}
+.foot a{color:#dab9e2}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .75s ease,transform .75s ease}
+.reveal.visible{opacity:1;transform:none}
+.upload-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:18px clamp(20px,6vw,85px);background:#231a28;border-bottom:1px solid #eac6ec30;color:#e4d6e7;font-size:12px;line-height:1.5}
+.upload-bar span{max-width:780px}
+.file-control{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+@keyframes galleryFloat{0%,100%{transform:translateY(1.5%) scale(1)}50%{transform:translateY(-1.5%) scale(1.015)}}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media(max-width:850px){
+ .stage-inner{grid-template-columns:1fr;padding-top:58px;padding-bottom:95px;gap:8px}
+ .copy h1{font-size:clamp(45px,8vw,72px)}
+ .visual{height:430px}
+ .stage{min-height:0}
+ .section{padding-top:65px;padding-bottom:65px}
+ .collection{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .story-inner{grid-template-columns:1fr;gap:24px;padding:70px 24px}
+}
+@media(max-width:540px){
+ .topbar{height:69px}.top-inner{padding:0 12px}
+ .brand img{width:43px;height:45px}.brand-name{font-size:17px}.brand-small{font-size:8px}
+ .link-quiet{display:none}.btn{padding:10px 13px;font-size:11px}
+ .stage-inner{padding:35px 17px 78px}
+ .copy h1{font-size:clamp(43px,12vw,62px);margin:14px 0}
+ .copy p{font-size:14px}
+ .hero-actions{margin:20px 0}
+ .visual{height:clamp(320px,107vw,470px);margin-top:5px}
+ .product-photo{height:94%}.corner{right:4%}
+ .scroll-hint{bottom:15px}
+ .section{padding:54px 18px}
+ .section-title{display:block}
+ .collection{grid-template-columns:1fr 1fr;gap:10px}
+ .look{min-height:270px;padding:9px;border-radius:12px}
+ .look img{height:206px}
+ .look .look-name{font-size:12px}
+ .look .look-detail{font-size:10px}
+ .details{gap:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}.brand img,.product-photo{animation:none}
+ .reveal{opacity:1;transform:none;transition:none}
+ .photo-frame,.look img{transition:none}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="top-inner">
+  <a href="./" class="brand" aria-label="Ir a Punto Moda">
+   <img src="brand-mark.svg" alt="" width="52" height="54">
+   <span><span class="brand-name"><span>Punto</span><span>Moda</span></span><small class="brand-small">Escaparate de prueba</small></span>
+  </a>
+  <div class="top-actions">
+   <a href="gestion/" class="link-quiet">Puerta trasera</a>
+   <button id="upload-top" class="btn" type="button">Probar una foto</button>
+  </div>
+ </div>
+</header>
+<div class="upload-bar"><span><strong>Vista previa en desarrollo.</strong> Las fotos cargadas desde la puerta trasera se ven solamente en este navegador. Una foto elegida acá es temporal: no se guarda ni publica en el catálogo.</span><a href="gestion/" style="color:#e5bee9">Cargar producto y stock</a></div>
+<main>
+ <section class="stage" aria-label="Presentación destacada">
+  <div class="stage-lines" aria-hidden="true"></div>
+  <div class="stage-inner">
+   <div class="copy">
+    <span class="eyebrow">Punto Moda · Presentación de prendas</span>
+    <h1 id="hero-title">Cada prenda, <em>una historia.</em></h1>
+    <p id="hero-description">Tus prendas en primer plano, con una presentación envolvente que destaca los detalles de cada producto.</p>
+    <div class="meta"><span id="hero-category">Indumentaria</span><span class="dot"></span><span id="hero-price">Precio a consultar</span></div>
+    <div class="hero-actions">
+      <a id="consult" class="hero-link" href="https://wa.me/5493435016514" target="_blank" rel="noopener noreferrer">Consultar por WhatsApp</a>
+      <a href="#coleccion" class="hero-link secondary">Ver otras prendas</a>
+    </div>
+    <p class="preview-note">Efecto visual de demostración a partir de una foto real. No simula un giro 3D ni altera la prenda original.</p>
+   </div>
+   <div class="visual">
+    <div class="photo-frame" id="photo-frame">
+     <div class="product-halo" aria-hidden="true"></div><div class="product-halo second" aria-hidden="true"></div>
+     <img id="hero-photo" class="product-photo" src="images/PM-002.jpg" alt="Producto de Punto Moda">
+    </div>
+    <span class="corner" aria-hidden="true">Punto Moda / Datalisting</span>
+   </div>
+  </div>
+  <a href="#coleccion" class="scroll-hint">Deslizá para descubrir</a>
+ </section>
+ <section id="coleccion" class="section">
+  <div class="section-title reveal">
+   <div><span class="eyebrow">La selección</span><h2>Elegí una prenda.</h2></div>
+   <p>Una presentación diferente para cada foto. Seleccioná un producto del inventario o probá con la imagen que quieras.</p>
+  </div>
+  <div class="collection reveal" id="collection" aria-label="Productos disponibles para previsualizar"></div>
+ </section>
+ <section class="story" aria-label="Detalles de la prenda">
+  <div class="story-inner">
+   <div class="reveal"><span class="eyebrow">Lo que importa</span><h2>Los detalles marcan la diferencia.</h2><p>La fotografía original sigue siendo la protagonista. El efecto de profundidad, las transiciones y la tipografía acompañan sin modificar el diseño real del producto.</p></div>
+   <div class="details reveal">
+    <div><b>Producto</b><span id="detail-name">Prenda de Punto Moda</span></div>
+    <div><b>Referencia</b><span id="detail-sku">Vista previa</span></div>
+    <div><b>Talle</b><span id="detail-size">A consultar</span></div>
+    <div><b>Color</b><span id="detail-color">A consultar</span></div>
+    <div><b>Disponibilidad</b><span id="detail-stock">Consultar</span></div>
+    <div><b>Precio</b><span id="detail-price">Consultar</span></div>
+   </div>
+  </div>
+ </section>
+</main>
+<footer class="foot"><strong>By Datalisting</strong> · Propuesta Punto Moda en desarrollo · <a href="https://20facusam23.github.io/portfolio/">Ver portfolio</a></footer>
+<input id="photo-input" class="file-control" type="file" accept="image/*" aria-label="Elegir foto de una prenda">
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const KEY='punto-moda-inventario-demo-v1';
+const demo=[
+ {sku:'PM-002',name:'Remera deportiva sin mangas',category:'Indumentaria',description:'Negro · deportiva',price:null,qty:null,size:'',color:'Negro',img:'images/PM-002.jpg'},
+ {sku:'PM-011',name:'Camisa estampada de hojas',category:'Indumentaria',description:'Blanca con estampado negro · manga larga',price:null,qty:null,size:'',color:'Blanco y negro',img:'images/PM-011.jpg'},
+ {sku:'PM-005',name:'Botines estilo T90',category:'Calzado',description:'Turquesa o lima',price:null,qty:null,size:'',color:'Turquesa o lima',img:'images/PM-005.jpg'}
+];
+const fmt=v=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(v));
+function photoSrc(p){
+ const s=String(p.img||'');
+ if(/^data:image\/(jpeg|jpg|png|webp);base64,/i.test(s))return s;
+ if(/^(\.\.\/)?images\/PM-[A-Za-z0-9-]+\.jpg$/.test(s))return 'images/'+s.split('/').pop();
+ if(/^images\/PM-[A-Za-z0-9-]+\.jpg$/.test(s))return s;
+ if(/^PM-[A-Za-z0-9-]+$/.test(String(p.sku)))return 'images/'+p.sku+'.jpg';
+ return '';
+}
+function readInventory(){
+ try{
+  const d=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(!d||!Array.isArray(d.products))return [];
+  return d.products.map(p=>({...p,img:photoSrc(p)})).filter(p=>p.img);
+ }catch{return []}
+}
+let collection=readInventory();
+if(!collection.length)collection=demo.slice();
+const wanted=new URLSearchParams(location.search).get('sku');
+let current=collection.find(p=>p.sku===wanted)||collection.find(p=>p.qty>0&&p.category==='Indumentaria')||collection.find(p=>p.category==='Indumentaria')||collection[0];
+function subtitle(p){
+ const parts=[p.description,p.size?'Talle '+p.size:'',p.color?'Color '+p.color:''].filter(Boolean);
+ return parts.join(' · ')||'Prenda de Punto Moda';
+}
+function price(p){return p.price!=null&&p.price!==''&&Number.isFinite(Number(p.price))?fmt(p.price):'Precio a consultar'}
+function setText(id,s){$(id).textContent=s}
+function renderInfo(p){
+ const title=p.name||'Prenda de Punto Moda';
+ setText('hero-title',title);
+ setText('hero-description',subtitle(p));
+ setText('hero-category',p.category||'Indumentaria');
+ setText('hero-price',price(p));
+ setText('detail-name',title);
+ setText('detail-sku',p.sku||'Foto de prueba');
+ setText('detail-size',p.size||'A consultar');
+ setText('detail-color',p.color||'A consultar');
+ setText('detail-stock',Number.isFinite(Number(p.qty))&&p.qty!==null&&p.qty!==''?(Number(p.qty)>0?p.qty+' unidades en inventario local':'Sin stock cargado en inventario local'):'Consultar');
+ setText('detail-price',price(p));
+ $('consult').href='https://wa.me/5493435016514?text='+encodeURIComponent('Hola Punto Moda, quisiera consultar por '+title+(p.sku?' ('+p.sku+')':'')+'. ¿Qué precio, talles y disponibilidad tienen?');
+}
+let animationTimer=null;
+function select(p,move){
+ current=p;
+ if(animationTimer)clearTimeout(animationTimer);
+ const frame=$('photo-frame');
+ if(move)frame.classList.add('entering');
+ animationTimer=setTimeout(()=>{
+  $('hero-photo').src=photoSrc(p)||'images/PM-002.jpg';
+  $('hero-photo').alt='Foto de '+(p.name||'producto Punto Moda');
+  renderInfo(p);
+  frame.classList.remove('entering');
+ },move?170:0);
+ for(const b of $('collection').querySelectorAll('button[data-sku]')){
+  const active=b.dataset.sku===p.sku;
+  b.classList.toggle('current',active);
+  b.setAttribute('aria-pressed',String(active));
+ }
+ if(move)window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
+function drawCollection(){
+ const root=$('collection');root.replaceChildren();
+ collection.slice(0,24).forEach((p,i)=>{
+  const b=document.createElement('button');
+  b.type='button';b.className='look';b.dataset.sku=p.sku||'temporal';
+  b.setAttribute('aria-label','Presentar '+(p.name||'la foto elegida'));
+  const img=document.createElement('img');img.src=photoSrc(p)||'images/PM-002.jpg';img.alt='';img.loading=i<3?'eager':'lazy';
+  const label=document.createElement('span');label.className='look-name';label.textContent=p.name||'Foto de prueba';
+  const detail=document.createElement('span');detail.className='look-detail';detail.textContent=p.category||'Indumentaria';
+  b.append(img,label,detail);b.onclick=()=>select(p,true);root.append(b);
+ });
+}
+async function upload(file){
+ if(!file)return;
+ if(!/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type)){alert('Elegí una imagen JPG, PNG o WebP compatible con el navegador.');return}
+ if(file.size>15*1024*1024){alert('La foto supera los 15 MB.');return}
+ let url=URL.createObjectURL(file);
+ try{
+  const im=new Image();
+  await new Promise((resolve,reject)=>{im.onload=resolve;im.onerror=reject;im.src=url});
+  const longest=Math.max(im.naturalWidth,im.naturalHeight);
+  const scale=Math.min(1,1500/Math.max(longest,1));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(im.naturalWidth*scale));canvas.height=Math.max(1,Math.round(im.naturalHeight*scale));
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(im,0,0,canvas.width,canvas.height);
+  const p={sku:'foto-temporal',name:'Tu prenda en primer plano',category:'Indumentaria',description:'Una presentación creada con tu fotografía',price:null,qty:null,size:'',color:'',img:canvas.toDataURL('image/jpeg',.86)};
+  collection=collection.filter(x=>x.sku!==p.sku);
+  collection.unshift(p);
+  drawCollection();select(p,true);
+ }catch{alert('No se pudo abrir esta foto. Probá con JPG o PNG.')}
+ finally{URL.revokeObjectURL(url);$('photo-input').value=''}
+}
+$('upload-top').addEventListener('click',()=>$('photo-input').click());
+$('photo-input').addEventListener('change',e=>upload(e.target.files?.[0]));
+$('hero-photo').addEventListener('error',e=>{if(!e.target.src.includes('PM-002.jpg'))e.target.src='images/PM-002.jpg'});
+drawCollection();select(current,false);
+const observer='IntersectionObserver'in window?new IntersectionObserver(entries=>{
+ entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}});
+},{threshold:.1}):null;
+document.querySelectorAll('.reveal').forEach(el=>observer?observer.observe(el):el.classList.add('visible'));
+})();
+</script>
+</body>
+</html>
