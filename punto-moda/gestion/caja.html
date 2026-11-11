@@ -40,7 +40,7 @@ dialog{border:0;border-radius:16px;width:min(94vw,510px);padding:20px;color:var(
 <div class="pills" role="tablist"><button class="pill" role="tab" data-view="checkout" aria-selected="true">Caja · Ventas</button><button class="pill" role="tab" data-view="labels" aria-selected="false">Etiquetas · 4 por A4</button><button class="pill" role="tab" data-view="stock" aria-selected="false">Stock y registro</button></div>
 <section class="panel" id="view-checkout"><h2>Venta en mostrador</h2><p>Leé el código con la cámara o escribilo. También acepta un lector USB/Bluetooth que actúe como teclado.</p>
 <div class="row"><label class="field grow">Código de barras o artículo<input id="scan-code" autocomplete="off" placeholder="Ej.: 6925564561023 o PM-003"></label><button class="btn alt" id="camera-open" type="button">Cámara</button><button class="btn" id="add-code" type="button">Agregar</button></div>
-<div class="tablewrap"><table><thead><tr><th>Producto</th><th>Stock actual</th><th>Cant.</th><th>Precio unitario</th><th>Subtotal</th><th></th></tr></thead><tbody id="sale-items"><tr><td colspan="6">Escaneá un producto para comenzar.</td></tr></tbody></table></div>
+<div class="row"><label class="field grow">Buscar por descripción, nombre, talle, color o código<input id="product-search" type="search" autocomplete="off" placeholder="Ej.: zapatillas Salomon, remera negra, PM-003"></label><label class="field grow">Productos encontrados<select id="product-search-results" aria-label="Resultados de búsqueda"><option value="">Escribí para buscar o seleccioná un producto</option></select></label><button class="btn" id="add-selected" type="button">Agregar seleccionado</button></div><p class="foot" id="search-count">También podés escanear o escribir el código arriba.</p><div class="tablewrap"><table><thead><tr><th>Producto</th><th>Stock actual</th><th>Cant.</th><th>Precio unitario</th><th>Subtotal</th><th></th></tr></thead><tbody id="sale-items"><tr><td colspan="6">Escaneá un producto para comenzar.</td></tr></tbody></table></div>
 <div class="summary"><span>Artículos en la venta: <strong id="sale-units">0</strong></span><span>Total estimado: <strong id="sale-total">$ 0</strong></span></div>
 <div class="row"><label class="field grow">Medio de pago (registro)<select id="payment"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Mercado Pago (confirmado externamente)">Mercado Pago (confirmado por fuera)</option><option value="Otro">Otro</option></select></label><label class="field grow">Observación / comprobante<input id="sale-note" maxlength="150" placeholder="N.º de comprobante o comentario"></label></div>
 <div class="row"><button class="btn green" id="confirm-sale">Confirmar venta y descontar stock</button><button class="btn alt" id="clear-sale">Vaciar selección</button></div>
@@ -60,6 +60,7 @@ dialog{border:0;border-radius:16px;width:min(94vw,510px);padding:20px;color:var(
 const KEY='punto-moda-inventario-demo-v1';
 const $=id=>document.getElementById(id);
 const lineItems=new Map();
+const priceOverrides=new Map();
 const money=v=>v==null?'A consultar':new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:2}).format(v);
 const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const numeric=x=>Number.isFinite(Number(x))&&x!==null?Number(x):null;
@@ -68,32 +69,94 @@ const dbOrWarn=()=>{const db=read();if(!db){$('sale-message').textContent='Prime
 const find=(db,code)=>db.products.find(p=>String(p.sku).trim().toUpperCase()===code.toUpperCase()||(p.barcode&&String(p.barcode).trim()===code));
 function showView(name){for(const id of ['checkout','labels','stock'])$('view-'+id).hidden=id!==name;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.view===name)));if(name==='labels')refreshLabels();if(name==='stock')renderHistory();}
 document.querySelectorAll('[data-view]').forEach(x=>x.addEventListener('click',()=>showView(x.dataset.view)));
-function addCode(){const db=dbOrWarn();if(!db)return;const value=$('scan-code').value.trim();if(!value)return;const p=find(db,value);if(!p){$('sale-message').textContent='Código no encontrado: '+value+'. Cargalo primero en Inventario → Artículo.';return;}
-const count=lineItems.get(p.sku)||0;if(count+1>p.qty){$('sale-message').textContent='No hay stock suficiente de '+p.name+' (hay '+p.qty+').';return;}lineItems.set(p.sku,count+1);$('scan-code').value='';$('scan-code').focus();$('sale-message').textContent='Agregado: '+p.name;drawCart();}
-function drawCart(){const db=read();const root=$('sale-items');root.replaceChildren();let total=0,units=0;
-for(const [sku,qty] of lineItems){const p=db?.products.find(x=>x.sku===sku);if(!p)continue;units+=qty;if(p.price!=null)total+=Number(p.price)*qty;
-const tr=document.createElement('tr');
-tr.innerHTML='<td><b>'+esc(p.name)+'</b><small>'+esc(sku)+' · '+esc([p.size,p.color].filter(Boolean).join(' / '))+'</small></td><td>'+p.qty+'</td><td><span class="qtybuttons"><button data-action="minus" data-sku="'+esc(sku)+'">−</button><b>'+qty+'</b><button data-action="plus" data-sku="'+esc(sku)+'">+</button></span></td><td>'+money(p.price)+'</td><td>'+money(p.price==null?null:p.price*qty)+'</td><td><button class="btn danger" data-action="remove" data-sku="'+esc(sku)+'">Quitar</button></td>';root.append(tr);}
-if(!units)root.innerHTML='<tr><td colspan="6">Escaneá un producto para comenzar.</td></tr>';
-$('sale-units').textContent=units;$('sale-total').textContent=money(total);$('confirm-sale').disabled=!units;}
+const unitPrice=p=>{
+ if(priceOverrides.has(p.sku))return priceOverrides.get(p.sku);
+ if(p.price==null||p.price==="")return null;
+ const n=Number(p.price);return Number.isFinite(n)&&n>=0?n:null;
+};
+function addProduct(p){
+ const count=lineItems.get(p.sku)||0;
+ if(count+1>Number(p.qty)){$('sale-message').textContent='No hay stock suficiente de '+p.name+' (hay '+p.qty+').';return false;}
+ lineItems.set(p.sku,count+1);
+ $('sale-message').textContent='Agregado: '+p.name;
+ drawCart();return true;
+}
+function renderSearch(){
+ const db=read(),select=$('product-search-results'),query=$('product-search').value.trim().toLocaleLowerCase('es-AR');
+ const previous=select.value;select.replaceChildren();
+ const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=db?'Seleccioná un artículo':'Inicializá la planilla desde Inventario';select.append(placeholder);
+ if(!db){$('search-count').textContent='El inventario local todavía no está inicializado.';return;}
+ const matches=db.products.filter(p=>[p.name,p.description,p.sku,p.barcode,p.category,p.size,p.color,p.supplierRef].join(' ').toLocaleLowerCase('es-AR').includes(query));
+ for(const p of matches.slice(0,100)){
+  const option=document.createElement('option');option.value=p.sku;option.textContent=p.name+' · '+p.sku+' · Stock: '+p.qty;select.append(option);
+ }
+ if(matches.some(p=>p.sku===previous))select.value=previous;
+ $('search-count').textContent=matches.length+' artículo(s) encontrado(s)'+(matches.length>100?' (mostrando los primeros 100)':'')+'. El buscador no necesita código de barras.';
+}
+function addCode(){
+ const db=dbOrWarn();if(!db)return;
+ const value=$('scan-code').value.trim();if(!value)return;
+ const p=find(db,value);
+ if(!p){$('sale-message').textContent='Código no encontrado: '+value+'. También podés buscar el producto por descripción.';return;}
+ if(addProduct(p)){$('scan-code').value='';$('scan-code').focus();}
+}
+$('product-search').addEventListener('input',renderSearch);
+$('add-selected').addEventListener('click',()=>{
+ const db=dbOrWarn();if(!db)return;
+ const p=db.products.find(x=>x.sku===$('product-search-results').value);
+ if(!p){$('sale-message').textContent='Elegí un producto de los resultados de búsqueda.';return;}
+ addProduct(p);
+});
+
+function drawCart(){
+ const db=read(),root=$('sale-items');root.replaceChildren();let total=0,units=0,missing=false;
+ for(const [sku,qty] of lineItems){
+  const p=db?.products.find(x=>x.sku===sku);if(!p)continue;
+  const price=unitPrice(p);units+=qty;if(price==null)missing=true;else total+=price*qty;
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td><b>'+esc(p.name)+'</b><small>'+esc(sku)+' · '+esc([p.size,p.color].filter(Boolean).join(' / '))+'</small></td><td>'+p.qty+'</td><td><span class="qtybuttons"><button data-action="minus" data-sku="'+esc(sku)+'">−</button><b>'+qty+'</b><button data-action="plus" data-sku="'+esc(sku)+'">+</button></span></td><td><input class="price-input" type="number" min="0" step="0.01" inputmode="decimal" data-sku="'+esc(sku)+'" aria-label="Precio para '+esc(p.name)+'" placeholder="Cargar precio" style="width:135px;max-width:100%;border:1px solid #d8cbdd;border-radius:9px;padding:9px" value="'+(price==null?'':price)+'"><small>Solo esta venta</small></td><td>'+money(price==null?null:price*qty)+'</td><td><button class="btn danger" data-action="remove" data-sku="'+esc(sku)+'">Quitar</button></td>';
+  root.append(tr);
+ }
+ if(!units)root.innerHTML='<tr><td colspan="6">Escaneá o buscá un producto para comenzar.</td></tr>';
+ $('sale-units').textContent=units;$('sale-total').textContent=missing?'Falta asignar precio':money(total);
+ $('confirm-sale').disabled=!units;
+}
+$('sale-items').addEventListener('change',e=>{
+ const input=e.target.closest('.price-input');if(!input)return;
+ const sku=input.dataset.sku,raw=input.value.trim();
+ if(raw==='')priceOverrides.delete(sku);
+ else{const n=Number(raw);if(!Number.isFinite(n)||n<0){$('sale-message').textContent='Ingresá un precio válido, mayor o igual a cero.';drawCart();return;}priceOverrides.set(sku,n);}
+ drawCart();
+});
+
 $('sale-items').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const sku=b.dataset.sku;const db=read(),p=db?.products.find(x=>x.sku===sku);if(!p)return;const current=lineItems.get(sku)||0;
-if(b.dataset.action==='remove'||b.dataset.action==='minus'&&current===1)lineItems.delete(sku);
+if(b.dataset.action==='remove'||b.dataset.action==='minus'&&current===1){lineItems.delete(sku);priceOverrides.delete(sku);}
 else if(b.dataset.action==='minus')lineItems.set(sku,current-1);
 else if(b.dataset.action==='plus'){if(current>=p.qty){$('sale-message').textContent='No hay más stock disponible.';return;}lineItems.set(sku,current+1);}
 drawCart();});
 $('add-code').addEventListener('click',addCode);$('scan-code').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCode()}});
-$('clear-sale').addEventListener('click',()=>{lineItems.clear();drawCart();$('sale-message').textContent='Venta vaciada.'});
+$('clear-sale').addEventListener('click',()=>{lineItems.clear();priceOverrides.clear();drawCart();$('sale-message').textContent='Venta vaciada.'});
 $('confirm-sale').addEventListener('click',()=>{
-const db=dbOrWarn();if(!db||!lineItems.size)return;
-for(const [sku,qty] of lineItems){const p=db.products.find(x=>x.sku===sku);if(!p||p.qty<qty){$('sale-message').textContent='No se registró: stock insuficiente o artículo inexistente ('+sku+').';return;}
-if(p.price==null||!Number.isFinite(Number(p.price))){$('sale-message').textContent='Antes de vender asigná un precio de venta al artículo '+sku+'.';return;}}
-const total=[...lineItems].reduce((sum,[sku,qty])=>sum+Number(db.products.find(p=>p.sku===sku).price)*qty,0);
-if(!confirm('¿Confirmar venta por '+money(total)+' y descontar '+[...lineItems.values()].reduce((a,b)=>a+b,0)+' unidades del stock local?'))return;
-const batch='PMV-'+Date.now().toString(36).toUpperCase();const date=new Date().toISOString(),payment=$('payment').value,comment=$('sale-note').value.trim();
-const next=structuredClone(db);
-for(const [sku,qty] of lineItems){const p=next.products.find(x=>x.sku===sku);p.qty-=qty;next.movements.push({id:crypto.randomUUID(),batchId:batch,date,type:'sale',sku:p.sku,name:p.name,qty,unitPrice:Number(p.price),payment,note:batch+' · '+payment+(comment?' · '+comment:'')})}
-try{localStorage.setItem(KEY,JSON.stringify(next));}catch{$('sale-message').textContent='No se pudo guardar. Descargá respaldo desde Inventario.';return;}
-lineItems.clear();$('sale-note').value='';drawCart();refreshLabels();$('sale-message').textContent='Venta '+batch+' registrada. Total '+money(total)+'. Se descontó stock en este navegador.';});
+ const db=dbOrWarn();if(!db||!lineItems.size)return;
+ for(const [sku,qty] of lineItems){
+  const p=db.products.find(x=>x.sku===sku);
+  if(!p||Number(p.qty)<qty){$('sale-message').textContent='No se registró: stock insuficiente o artículo inexistente ('+sku+').';return;}
+  if(unitPrice(p)==null){$('sale-message').textContent='Ingresá el precio de venta para '+(p.name||sku)+'.';return;}
+ }
+ const total=[...lineItems].reduce((sum,[sku,qty])=>sum+unitPrice(db.products.find(p=>p.sku===sku))*qty,0);
+ if(!confirm('¿Confirmar venta por '+money(total)+' y descontar '+[...lineItems.values()].reduce((a,b)=>a+b,0)+' unidades del stock local?'))return;
+ const batch='PMV-'+Date.now().toString(36).toUpperCase(),date=new Date().toISOString(),payment=$('payment').value,comment=$('sale-note').value.trim();
+ const next=structuredClone(db);
+ for(const [sku,qty] of lineItems){
+  const p=next.products.find(x=>x.sku===sku),price=unitPrice(p);
+  p.qty-=qty;
+  next.movements.push({id:crypto.randomUUID(),batchId:batch,date,type:'sale',sku:p.sku,name:p.name,qty,unitPrice:price,payment,note:batch+' · '+payment+(comment?' · '+comment:'')});
+ }
+ try{localStorage.setItem(KEY,JSON.stringify(next));}catch{$('sale-message').textContent='No se pudo guardar. Descargá respaldo desde Inventario.';return;}
+ lineItems.clear();priceOverrides.clear();$('sale-note').value='';drawCart();refreshLabels();renderSearch();
+ $('sale-message').textContent='Venta '+batch+' registrada. Total '+money(total)+'. Se descontó stock en este navegador.';
+});
+
 const CODE39={
 '0':'nnnwwnwnn','1':'wnnwnnnnw','2':'nnwwnnnnw','3':'wnwwnnnnn','4':'nnnwwnnnw','5':'wnnwwnnnn','6':'nnwwwnnnn','7':'nnnwnnwnw','8':'wnnwnnwnn','9':'nnwwnnwnn',
 'A':'wnnnnwnnw','B':'nnwnnwnnw','C':'wnwnnwnnn','D':'nnnnwwnnw','E':'wnnnwwnnn','F':'nnwnwwnnn','G':'nnnnnwwnw','H':'wnnnnwwnn','I':'nnwnnwwnn','J':'nnnnwwwnn',
@@ -126,7 +189,7 @@ if(!usable.length)throw Error('No hay formatos compatibles');const detector=new 
 $('camera-video').srcObject=stream;$('camera-dialog').showModal();await $('camera-video').play();interval=setInterval(async()=>{if(busy||$('camera-video').readyState<2)return;busy=true;try{const found=await detector.detect($('camera-video'));if(found?.[0]?.rawValue){$('scan-code').value=found[0].rawValue;await closeCamera();addCode();}}catch{}finally{busy=false;}},350);
 }catch(err){await closeCamera();$('sale-message').textContent='No se pudo usar la cámara: '+(err.message||'permiso denegado');}});
 $('camera-close').addEventListener('click',closeCamera);$('camera-dialog').addEventListener('cancel',e=>{e.preventDefault();closeCamera()});document.addEventListener('visibilitychange',()=>{if(document.hidden&&stream)closeCamera()});
-window.addEventListener('storage',e=>{if(e.key===KEY){drawCart();if(!$('view-stock').hidden)renderHistory();if(!$('view-labels').hidden)refreshLabels();}});
-drawCart();refreshLabels();renderHistory();
+window.addEventListener('storage',e=>{if(e.key===KEY){drawCart();renderSearch();if(!$('view-stock').hidden)renderHistory();if(!$('view-labels').hidden)refreshLabels();}});
+drawCart();refreshLabels();renderHistory();renderSearch();
 })();
 </script></body></html>
