@@ -28,12 +28,22 @@ function textOf(element) {
   return element.textContent + element.children.map(textOf).join('\n');
 }
 
-function receiptHarness({ number = '', storage = new Map(), blockedStorage = false } = {}) {
+function receiptHarness({ number = '', storage = new Map(), blockedStorage = false,
+  withWelcome = false, withDeliveryControls = false, subtotal = 0 } = {}) {
   const nodes = Object.fromEntries(['orderReceiptDialog', 'orderReceiptContent', 'lastOrderButton',
     'lastOrderNav', 'closeOrderReceipt', 'sendOrderButton'].map(id => [id, new Element()]));
   const navigations = [];
   const copies = [];
-  const document = { getElementById: id => nodes[id] || null, createElement: () => new Element() };
+  const events = new Map();
+  if (withWelcome) nodes.nutsWelcome = new Element();
+  if (withDeliveryControls) {
+    ['nutsShipping', 'deliveryAddressRow', 'deliveryAddress', 'shippingSummary',
+      'checkoutProductsTotal', 'checkoutTotal', 'checkoutForm'].forEach(id => { nodes[id] = new Element(); });
+    nodes.nutsShipping.checked = false;
+  }
+  const document = { getElementById: id => nodes[id] || null, createElement: () => new Element(),
+    addEventListener: (name, fn) => events.set(name, fn),
+    removeEventListener: name => events.delete(name) };
   const sessionStorage = {
     getItem: key => { if (blockedStorage) throw Error('Storage blocked'); return storage.get(key) || null; },
     setItem: (key, value) => { if (blockedStorage) throw Error('Storage blocked'); storage.set(key, value); },
@@ -41,11 +51,13 @@ function receiptHarness({ number = '', storage = new Map(), blockedStorage = fal
   };
   const window = { location: { assign: url => navigations.push(url) } };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../assets/order-confirmation.js'), 'utf8'), {
-    window, document, sessionStorage, navigator: { clipboard: { writeText: async text => copies.push(text) } },
+    window, document, sessionStorage, queueMicrotask,
+    navigator: { clipboard: { writeText: async text => copies.push(text) } },
   });
   const options = { portal: 'nuts', config: { ORDER_WHATSAPP: number }, checkoutDialog: new Element(),
-    money: amount => '$ ' + amount.toFixed(2) };
-  return { nodes, navigations, storage, copies, options,
+    money: amount => '$ ' + amount.toFixed(2), getSubtotal: () => subtotal };
+  return { nodes, navigations, storage, copies, options, events,
+    delivery: window.DatalistingOrderDelivery,
     receipt: window.DatalistingOrderConfirmation.create(options),
     create: window.DatalistingOrderConfirmation.create };
 }
@@ -64,7 +76,7 @@ test('Nuts abre solo su número confirmado y usa el total confirmado del pedido'
   assert.equal(url.hostname, 'wa.me');
   assert.equal(url.pathname, '/5493430000000');
   assert.match(url.searchParams.get('text'), /2 × Arándanos 100 g/);
-  assert.match(url.searchParams.get('text'), /Total confirmado: \$ 1234\.50/);
+  assert.match(url.searchParams.get('text'), /Total del pedido: \$ 1234\.50/);
   assert.doesNotMatch(h.navigations[0], /5493439999999|DestinoDelProveedor/);
   assert.equal(h.nodes.orderReceiptDialog.open, true);
   assert.match(textOf(h.nodes.orderReceiptContent), /tocá Enviar/);
@@ -113,6 +125,60 @@ test('no se recuperan confirmaciones vencidas ni se activa el módulo en otra ti
   assert.equal(h.nodes.lastOrderButton.hidden, true);
   assert.equal(storage.size, 0);
   assert.equal(h.create({ ...h.options, portal: 'otra-tienda' }), null);
+});
+
+test('el cartel aparece al entrar y el primer toque lo cierra sin cancelar la acción', () => {
+  const h = receiptHarness({ withWelcome: true });
+  assert.equal(h.nodes.nutsWelcome.hidden, false);
+  let cancelled = false;
+  h.events.get('pointerdown')({ preventDefault() { cancelled = true; } });
+  assert.equal(h.nodes.nutsWelcome.hidden, true);
+  assert.equal(cancelled, false);
+  assert.equal(h.events.has('pointerdown'), false);
+  assert.equal(h.events.has('keydown'), false);
+  assert.equal(receiptHarness({ withWelcome: true }).nodes.nutsWelcome.hidden, false);
+});
+
+test('el cartel también se puede cerrar con el teclado', () => {
+  const h = receiptHarness({ withWelcome: true });
+  h.events.get('keydown')();
+  assert.equal(h.nodes.nutsWelcome.hidden, true);
+});
+
+test('elegir envío agrega $2000 y solicita dirección; al desmarcar se quita el cargo', () => {
+  const h = receiptHarness({ withDeliveryControls: true, subtotal: 5000 });
+  assert.equal(h.nodes.checkoutTotal.textContent, '$ 5000.00');
+  assert.equal(h.nodes.deliveryAddress.required, false);
+  h.nodes.nutsShipping.checked = true;
+  h.nodes.nutsShipping.events.change();
+  assert.equal(h.nodes.checkoutTotal.textContent, '$ 7000.00');
+  assert.equal(h.nodes.shippingSummary.hidden, false);
+  assert.equal(h.nodes.deliveryAddressRow.hidden, false);
+  assert.equal(h.nodes.deliveryAddress.required, true);
+  h.nodes.nutsShipping.checked = false;
+  h.nodes.nutsShipping.events.change();
+  assert.equal(h.nodes.checkoutTotal.textContent, '$ 5000.00');
+  assert.equal(h.nodes.deliveryAddress.required, false);
+});
+
+test('el pedido guardado y WhatsApp conservan dirección y el mismo cargo de envío', () => {
+  const h = receiptHarness({ number: '5493430000000' });
+  const data = { get: key => ({ nuts_shipping: '1', delivery_address: 'Calle de prueba 123, Paraná' })[key] || '' };
+  const notes = h.delivery.withDelivery('Retiro por la tarde', data);
+  h.receipt.confirm(saved, { ...customer, notes }, items);
+  const message = new URL(h.navigations[0]).searchParams.get('text');
+  assert.match(message, /Envío: \$ 2000\.00/);
+  assert.match(message, /Total del pedido: \$ 3234\.50/);
+  assert.match(message, /Calle de prueba 123, Paraná/);
+  assert.equal(h.delivery.totals(saved.total, notes).total, 3234.5);
+  assert.equal(h.delivery.deliveryFromNotes(notes).fee, 2000);
+});
+
+test('sin envío no se agrega el cargo, aunque el cliente lo mencionara en sus notas', () => {
+  const h = receiptHarness();
+  const previousNotes = 'Entrega: Envío a domicilio (+ $2.000).\nDirección de entrega: Antes';
+  const notes = h.delivery.withDelivery(previousNotes, { get: () => '' });
+  assert.equal(h.delivery.totals(5000, notes).total, 5000);
 });
 
 function checkoutHarness() {

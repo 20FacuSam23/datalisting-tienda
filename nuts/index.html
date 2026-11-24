@@ -21,6 +21,19 @@
   <title>Nuts · Productos naturales y dietéticos</title>
   <link rel="stylesheet" href="../assets/store.css?v=20261024-pedido1">
 <link rel="stylesheet" href="../assets/store-modern.css?v=20261024-pedido1">  <style>
+    .nuts-welcome { position: fixed; z-index: 1200; top: 14px; left: 50%; width: min(520px, calc(100% - 28px)); padding: 22px 26px; border: 1px solid #a8d8c1; border-top: 5px solid #196b4b; border-radius: 20px; background: #f1fff7; color: #173247; box-shadow: 0 16px 48px rgb(23 50 71 / .22); transform: translateX(-50%); pointer-events: none; animation: nuts-welcome-in .65s cubic-bezier(.18,.8,.25,1) both; }
+    .nuts-welcome strong { display: block; margin-bottom: 8px; color: #196b4b; font-size: 1.15rem; }
+    .nuts-welcome p { margin: 0; font-size: clamp(1.1rem, 3.5vw, 1.4rem); line-height: 1.45; font-weight: 650; }
+    .nuts-welcome small { display: block; margin-top: 12px; color: #52677d; font-size: .875rem; }
+    @keyframes nuts-welcome-in { from { transform: translate(-50%, -150%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .nuts-welcome { animation: none; } }
+    .nuts-delivery { margin: 18px 0; padding: 16px; display: grid; gap: 14px; border: 1px solid #cbd7e4; border-radius: 14px; }
+    .nuts-delivery legend { padding: 0 6px; font-weight: 700; }
+    .nuts-delivery-option { display: flex; align-items: center; gap: 12px; font-weight: 650; }
+    .nuts-delivery-option input { flex: 0 0 22px; width: 22px; height: 22px; margin: 0; accent-color: #196b4b; }
+    .nuts-delivery label:not(.nuts-delivery-option) { display: grid; gap: 8px; }
+    .nuts-delivery input[type=text] { width: 100%; min-width: 0; padding: 12px; border: 1px solid #cbd7e4; border-radius: 10px; font: inherit; }
+    #nutsWelcome[hidden], #deliveryAddressRow[hidden], #shippingSummary[hidden], #lastOrderNav[hidden] { display: none !important; }
     .nuts-order-nav { padding: 12px 5%; text-align: right; }
     .nuts-order-nav button { font: inherit; color: #196b4b; cursor: pointer; }
     .order-receipt-dialog { width: min(640px, calc(100% - 24px)); max-height: 90vh; padding: 24px; border: 1px solid #cbd7e4; border-radius: 20px; background: #fff; color: #173247; }
@@ -34,6 +47,11 @@
   </style>
 </head>
 <body>
+  <aside class="nuts-welcome" id="nutsWelcome" aria-label="Bienvenida a Nuts" aria-live="polite" hidden>
+    <strong>Bienvenido a Nuts</strong>
+    <p>Hacés tu pedido, te lo confirmamos y te lo enviamos.</p>
+    <small>Se cierra con el primer clic o toque.</small>
+  </aside>
   <div class="store-announcement">Nuts · Productos naturales y dietéticos</div><div class="privacy-shield" id="privacyShield" aria-hidden="true">
     <div>
       <strong>Contenido protegido</strong>
@@ -123,6 +141,13 @@
         <label class="full">Notas<textarea name="notes" maxlength="2000" rows="4" placeholder="Entrega, variantes, horario, etc."></textarea></label>
       </div>
       <p class="form-help">Indicá al menos email o teléfono para que puedan contactarte.</p>
+      <fieldset class="nuts-delivery">
+        <legend>Entrega del pedido</legend>
+        <label class="nuts-delivery-option"><input id="nutsShipping" name="nuts_shipping" type="checkbox" value="1">Agregar envío (+ $2.000)</label>
+        <label id="deliveryAddressRow" hidden>Dirección de entrega<input id="deliveryAddress" name="delivery_address" type="text" maxlength="500" autocomplete="street-address" placeholder="Calle, número y localidad"></label>
+      </fieldset>
+      <div class="checkout-total"><span>Productos</span><strong id="checkoutProductsTotal">$ 0</strong></div>
+      <div class="checkout-total" id="shippingSummary" hidden><span>Envío</span><strong>$ 2.000,00</strong></div>
       <div class="checkout-total"><span>Total estimado</span><strong id="checkoutTotal">$ 0</strong></div>
       <button class="checkout-button" id="sendOrderButton" type="button">Confirmar pedido</button>
       <p class="form-message" id="formMessage" role="status"></p>
@@ -136,9 +161,9 @@
 
   <footer><span id="footerStore">Nuts</span><span>·</span><span>Tienda online</span><a id="manageStoreLink" href="../gestion/?portal=nuts#ordersSection">Administrar Nuts y ver pedidos</a></footer>
   <script src="../config.js?v=20261018-identidad1"></script>
-  <script src="config.js?v=20261124-nuts-pedidos1"></script>
-  <script src="../assets/order-confirmation.js?v=20261124-nuts-pedidos1"></script>
-  <script src="../assets/store.js?v=20261124-nuts-pedidos1"></script>
+  <script src="config.js?v=20261124-nuts-entrega2"></script>
+  <script src="../assets/order-confirmation.js?v=20261124-nuts-entrega2"></script>
+  <script src="../assets/store.js?v=20261124-nuts-entrega2"></script>
   <script src="../assets/hero.js?v=20261018-identidad1"></script>
 
 <script defer src="../assets/portal-privacy-consent.js" data-portal="nuts"></script>

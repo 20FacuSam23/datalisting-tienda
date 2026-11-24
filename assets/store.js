@@ -102,7 +102,7 @@
   const productDialog = $('productDialog');
   const productDialogContent = $('productDialogContent');
   const orderConfirmation = !selectedOrg && window.DatalistingOrderConfirmation?.create({
-    portal, config, checkoutDialog, money,
+    portal, config, checkoutDialog, money, getSubtotal: cartTotal,
   });
   const idleOrderLabel = sendOrderButton.textContent;
   let submittingOrder = false;
@@ -527,6 +527,7 @@
     const resetButton = $('resetCartButton');
     if (resetButton) resetButton.hidden = count === 0;
     checkoutButton.disabled = count === 0 || !!state.store.catalog_read_only || !!config.CATALOG_READ_ONLY;
+    orderConfirmation?.syncDelivery?.(cartTotal());
     syncCatalogQuantities();
   }
 
@@ -622,6 +623,7 @@
     const data = new FormData(form);
     const email = String(data.get('customer_email') || '').trim();
     const phone = String(data.get('customer_phone') || '').trim();
+    orderConfirmation?.syncDelivery?.();
     if (!form.reportValidity()) return;
     if (!email && !phone) {
       formMessage.classList.add('error');
@@ -639,6 +641,7 @@
       quantity: item.quantity,
       name: publicText(productById(item.offering_id)?.name || 'Producto'),
     }));
+    if (orderConfirmation?.withDelivery) payload.notes = orderConfirmation.withDelivery(payload.notes, data);
     submittingOrder = true;
     sendOrderButton.disabled = true;
     sendOrderButton.textContent = 'Enviando…';
