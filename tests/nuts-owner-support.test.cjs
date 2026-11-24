@@ -80,3 +80,32 @@ test('dos cargas simultáneas comparten una única sincronización', async () =>
   assert.equal(results[1], updated);
 });
 
+
+function accessPage() {
+  const nodes = Object.fromEntries(['loginHelp', 'nutsMatrixAccessRow', 'matrixRecoveryRow', 'matrixLoginRow', 'brandName']
+    .map(id => [id, { hidden: id === 'nutsMatrixAccessRow', textContent: 'Texto original' }]));
+  const document = { title: 'Administrar tienda', getElementById: id => nodes[id] };
+  const window = {};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../assets/nuts-owner-support.js'), 'utf8'), { window, document });
+  return { nodes, document, configure: window.DatalistingNutsOwner.configureAccess };
+}
+
+test('Nuts ofrece gestionar su cuenta desde Matriz y deja de indicar recuperar la contraseña central', () => {
+  const p = accessPage();
+  p.configure('nuts');
+  assert.equal(p.nodes.nutsMatrixAccessRow.hidden, false);
+  assert.equal(p.nodes.matrixRecoveryRow.hidden, true);
+  assert.equal(p.nodes.matrixLoginRow.hidden, true);
+  assert.match(p.nodes.loginHelp.textContent, /Crear cuenta o restablecer su contraseña/);
+  assert.match(p.nodes.loginHelp.textContent, /Dueño \/ administrador/);
+  assert.equal(p.document.title, 'Administrar Nuts');
+});
+
+test('la ayuda de Nuts no cambia el acceso de otras tiendas', () => {
+  const p = accessPage();
+  p.configure('punto-moda');
+  assert.equal(p.nodes.nutsMatrixAccessRow.hidden, true);
+  assert.equal(p.nodes.matrixRecoveryRow.hidden, false);
+  assert.equal(p.nodes.loginHelp.textContent, 'Texto original');
+  assert.equal(p.document.title, 'Administrar tienda');
+});

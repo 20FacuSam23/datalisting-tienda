@@ -4,6 +4,21 @@
   let lastAttempt = 0;
   let pending = null;
 
+  function configureAccess(portal) {
+    if (portal !== 'nuts') return;
+    const help = document.getElementById('loginHelp');
+    if (help) help.textContent = 'Configurá el acceso de Nuts desde tu Matriz, en Portales y propuestas. En la ficha de Nuts, usá Crear cuenta o restablecer su contraseña y el permiso Dueño / administrador.';
+    const access = document.getElementById('nutsMatrixAccessRow');
+    if (access) access.hidden = false;
+    for (const id of ['matrixRecoveryRow', 'matrixLoginRow']) {
+      const row = document.getElementById(id);
+      if (row) row.hidden = true;
+    }
+    const brand = document.getElementById('brandName');
+    if (brand) brand.textContent = 'Nuts';
+    document.title = 'Administrar Nuts';
+  }
+
   async function refreshCatalogIfDue({ portal, data, api, notify, now = Date.now() }) {
     if (portal !== 'nuts' || !data?.settings?.fudo?.enabled) return data;
     const syncedAt = Date.parse(data.settings.fudo.last_synced_at || '');
@@ -32,5 +47,5 @@
     }
   }
 
-  window.DatalistingNutsOwner = { refreshCatalogIfDue };
+  window.DatalistingNutsOwner = { configureAccess, refreshCatalogIfDue };
 })();
