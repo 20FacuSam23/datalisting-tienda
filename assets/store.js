@@ -653,7 +653,7 @@
         const first = result?.errors ? Object.values(result.errors).flat()[0] : result.message;
         throw new Error(publicText(first) || 'No se pudo enviar el pedido.');
       }
-      if (!result.order_id) throw new Error('No se recibió la confirmación del pedido. Revisá los pedidos de Nuts antes de volver a enviarlo.');
+      if (!result.order_id) throw new Error('No se recibió la confirmación del pedido. Revisá los pedidos de la tienda antes de volver a enviarlo.');
       state.cart.clear();
       saveCart();
       renderCart();
