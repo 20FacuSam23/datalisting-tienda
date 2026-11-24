@@ -101,6 +101,11 @@
   const loadMoreButton = $('loadMoreButton');
   const productDialog = $('productDialog');
   const productDialogContent = $('productDialogContent');
+  const orderConfirmation = !selectedOrg && window.DatalistingOrderConfirmation?.create({
+    portal, config, checkoutDialog, money,
+  });
+  const idleOrderLabel = sendOrderButton.textContent;
+  let submittingOrder = false;
   const storageKey = `datalisting-cart:${portal&&!selectedOrg?apiPortal:ORG}`;
   const cartMaxAge = 24 * 60 * 60 * 1000;
   let cartUpdatedAt = 0;
@@ -609,6 +614,7 @@
   }
 
   async function sendOrder() {
+    if (submittingOrder) return;
     formMessage.className = 'form-message';
     formMessage.textContent = '';
     if (!state.cart.size) return;
@@ -629,6 +635,11 @@
       notes: String(data.get('notes') || '').trim() || null,
       items: [...state.cart.entries()].map(([offering_id, quantity]) => ({ offering_id, quantity })),
     };
+    const orderItems = payload.items.map(item => ({
+      quantity: item.quantity,
+      name: publicText(productById(item.offering_id)?.name || 'Producto'),
+    }));
+    submittingOrder = true;
     sendOrderButton.disabled = true;
     sendOrderButton.textContent = 'Enviando…';
     try {
@@ -642,11 +653,16 @@
         const first = result?.errors ? Object.values(result.errors).flat()[0] : result.message;
         throw new Error(publicText(first) || 'No se pudo enviar el pedido.');
       }
+      if (!result.order_id) throw new Error('No se recibió la confirmación del pedido. Revisá los pedidos de Nuts antes de volver a enviarlo.');
       state.cart.clear();
       saveCart();
       renderCart();
       form.reset();
       formMessage.classList.add('success');
+      if (orderConfirmation) {
+        orderConfirmation.confirm(result, payload, orderItems);
+        return;
+      }
       const finalTotal = result.total != null ? ` · total confirmado ${money(Number(result.total))}` : '';
       const customerPricing = result.customer_pricing_applied ? ' · se aplicó tu condición comercial' : '';
       const emailText = result.email_sent ? ' · enviado por email' : '';const pendingText=!result.simulated&&!result.email_sent?' El pedido quedó registrado para revisión; el pago aún no se realizó.':'';
@@ -667,8 +683,9 @@
       formMessage.classList.add('error');
       formMessage.textContent = publicText(error.message) || 'No se pudo enviar el pedido.';
     } finally {
+      submittingOrder = false;
       sendOrderButton.disabled = false;
-      sendOrderButton.textContent = 'Enviar pedido';
+      sendOrderButton.textContent = idleOrderLabel;
     }
   }
 
@@ -724,4 +741,5 @@
   renderCart();
   refreshCatalog();
 })();
+
 

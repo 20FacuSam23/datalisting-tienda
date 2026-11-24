@@ -20,7 +20,19 @@
   <meta property="og:image:alt" content="Catálogo de Nuts con arándanos deshidratados y productos naturales.">
   <title>Nuts · Productos naturales y dietéticos</title>
   <link rel="stylesheet" href="../assets/store.css?v=20261024-pedido1">
-<link rel="stylesheet" href="../assets/store-modern.css?v=20261024-pedido1"></head>
+<link rel="stylesheet" href="../assets/store-modern.css?v=20261024-pedido1">  <style>
+    .nuts-order-nav { padding: 12px 5%; text-align: right; }
+    .nuts-order-nav button { font: inherit; color: #196b4b; cursor: pointer; }
+    .order-receipt-dialog { width: min(640px, calc(100% - 24px)); max-height: 90vh; padding: 24px; border: 1px solid #cbd7e4; border-radius: 20px; background: #fff; color: #173247; }
+    .order-receipt-dialog::backdrop { background: rgb(23 50 71 / .45); }
+    .order-receipt-dialog .icon-button { float: right; }
+    .order-receipt-dialog h2 { margin-top: 0; padding-right: 32px; }
+    .order-receipt-detail { padding: 16px; border-radius: 12px; background: #f6f8fc; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; user-select: text; }
+    .order-receipt-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .order-receipt-actions a { display: block; text-align: center; text-decoration: none; }
+    .order-receipt-actions button { font: inherit; cursor: pointer; }
+  </style>
+</head>
 <body>
   <div class="store-announcement">Nuts · Productos naturales y dietéticos</div><div class="privacy-shield" id="privacyShield" aria-hidden="true">
     <div>
@@ -37,6 +49,10 @@
       Pedido <span id="cartCount">0</span>
     </button>
   </header>
+
+  <nav class="nuts-order-nav" id="lastOrderNav" aria-label="Tus pedidos" hidden>
+    <button class="secondary-link" id="lastOrderButton" type="button" hidden>Ver mi último pedido</button>
+  </nav>
 
   <main><section id="promotionBuilder" class="promotion-builder" hidden></section>
     <section class="store-entry" id="inicio">
@@ -108,15 +124,21 @@
       </div>
       <p class="form-help">Indicá al menos email o teléfono para que puedan contactarte.</p>
       <div class="checkout-total"><span>Total estimado</span><strong id="checkoutTotal">$ 0</strong></div>
-      <button class="checkout-button" id="sendOrderButton" type="button">Enviar pedido</button>
+      <button class="checkout-button" id="sendOrderButton" type="button">Confirmar pedido</button>
       <p class="form-message" id="formMessage" role="status"></p>
     </form>
   </dialog>
 
-  <footer><span id="footerStore">Nuts</span><span>·</span><span>Tienda online</span><a id="manageStoreLink" href="../gestion/">Administrar tienda</a></footer>
+  <dialog class="order-receipt-dialog" id="orderReceiptDialog" aria-label="Confirmación del pedido">
+    <button class="icon-button" id="closeOrderReceipt" type="button" aria-label="Cerrar confirmación">×</button>
+    <div id="orderReceiptContent"></div>
+  </dialog>
+
+  <footer><span id="footerStore">Nuts</span><span>·</span><span>Tienda online</span><a id="manageStoreLink" href="../gestion/?portal=nuts#ordersSection">Administrar Nuts y ver pedidos</a></footer>
   <script src="../config.js?v=20261018-identidad1"></script>
-  <script src="config.js?v=20261018-identidad1"></script>
-  <script src="../assets/store.js?v=20261024-pedido1"></script>
+  <script src="config.js?v=20261124-nuts-pedidos1"></script>
+  <script src="../assets/order-confirmation.js?v=20261124-nuts-pedidos1"></script>
+  <script src="../assets/store.js?v=20261124-nuts-pedidos1"></script>
   <script src="../assets/hero.js?v=20261018-identidad1"></script>
 
 <script defer src="../assets/portal-privacy-consent.js" data-portal="nuts"></script>
@@ -124,4 +146,5 @@
 <script defer src="https://20facusam23.github.io/portfolio/datalisting-grid/grid.js?v=20261031-2" data-dg-site="nuts"></script>
 </body>
 </html>
+
 
